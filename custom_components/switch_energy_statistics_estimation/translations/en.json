@@ -1,0 +1,55 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Switch Energy Statistics Configuration",
+        "description": "Configure energy monitoring for your multi-gang switch",
+        "data": {
+          "switch_entity": "Switch Entity",
+          "gang_count": "Number of Gangs",
+          "name": "Name"
+        }
+      },
+      "gang_config": {
+        "title": "Gang Power Configuration",
+        "description": "Set power consumption for each gang of switch {switch_entity} ({gang_count} gangs)",
+        "data": {
+          "gang_1_power": "Gang 1 Power (W)",
+          "gang_2_power": "Gang 2 Power (W)",
+          "gang_3_power": "Gang 3 Power (W)",
+          "gang_4_power": "Gang 4 Power (W)",
+          "gang_5_power": "Gang 5 Power (W)",
+          "gang_6_power": "Gang 6 Power (W)",
+          "gang_7_power": "Gang 7 Power (W)",
+          "gang_8_power": "Gang 8 Power (W)"
+        }
+      }
+    },
+    "error": {
+      "invalid_switch_entity": "Selected switch entity is not valid",
+      "no_switch_entities": "No switch entities found. Please add some switches first."
+    },
+    "abort": {
+      "already_configured": "Device is already configured",
+      "no_switch_entities": "No switch entities found in your Home Assistant installation"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Update Gang Power Settings",
+        "description": "Update the power consumption settings for each gang",
+        "data": {
+          "gang_1_power": "Gang 1 Power (W)",
+          "gang_2_power": "Gang 2 Power (W)",
+          "gang_3_power": "Gang 3 Power (W)",
+          "gang_4_power": "Gang 4 Power (W)",
+          "gang_5_power": "Gang 5 Power (W)",
+          "gang_6_power": "Gang 6 Power (W)",
+          "gang_7_power": "Gang 7 Power (W)",
+          "gang_8_power": "Gang 8 Power (W)"
+        }
+      }
+    }
+  }
+}
