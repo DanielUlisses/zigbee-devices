@@ -33,7 +33,8 @@ async def get_switch_entities(hass: HomeAssistant) -> list[str]:
     switch_entities = []
     
     # Get entities from states (includes all active entities)
-    for entity_id, state in hass.states.async_all().items():
+    for state in hass.states.async_all():
+        entity_id = state.entity_id
         if entity_id.startswith(("switch.", "light.")):
             # Exclude certain entity types that aren't real switches
             if not any(exclude in entity_id for exclude in [
@@ -84,8 +85,8 @@ class SwitchEnergyStatisticsConfigFlow(config_entries.ConfigFlow, domain=DOMAIN)
             
             # Validate switch entity exists (check both registry and current states)
             available_entities = await get_switch_entities(self.hass)
-            current_states = [entity_id for entity_id in self.hass.states.async_entity_ids() 
-                            if entity_id.startswith(("switch.", "light."))]
+            current_states = [state.entity_id for state in self.hass.states.async_all() 
+                            if state.entity_id.startswith(("switch.", "light."))]
             all_entities = list(set(available_entities + current_states))
             
             if switch_entity not in all_entities:
@@ -109,8 +110,9 @@ class SwitchEnergyStatisticsConfigFlow(config_entries.ConfigFlow, domain=DOMAIN)
         _LOGGER.debug("Found %d switch entities: %s", len(switch_entities), switch_entities)
         
         if not switch_entities:
-            _LOGGER.warning("No switch entities found. Available entity domains: %s", 
-                          list(set(entity_id.split('.')[0] for entity_id in self.hass.states.async_entity_ids())))
+            all_entity_ids = [state.entity_id for state in self.hass.states.async_all()]
+            domains = list(set(entity_id.split('.')[0] for entity_id in all_entity_ids))
+            _LOGGER.warning("No switch entities found. Available entity domains: %s", domains)
             return self.async_abort(reason="no_switch_entities")
 
         data_schema = vol.Schema(
