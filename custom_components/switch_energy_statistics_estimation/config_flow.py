@@ -30,11 +30,29 @@ _LOGGER = logging.getLogger(__name__)
 
 async def get_switch_entities(hass: HomeAssistant) -> list[str]:
     """Get all available switch entities."""
-    entity_registry = async_get_entity_registry(hass)
     switch_entities = []
     
+    # Get entities from states (includes all active entities)
+    for entity_id, state in hass.states.async_all().items():
+        if entity_id.startswith(("switch.", "light.")):
+            # Exclude certain entity types that aren't real switches
+            if not any(exclude in entity_id for exclude in [
+                "_linkquality", "_update_available", "_update_state",
+                "_battery", "_signal_strength", "_voltage", "_power",
+                "_energy", "_current", "_temperature", "_humidity"
+            ]):
+                switch_entities.append(entity_id)
+    
+    # Also get from entity registry for disabled entities
+    entity_registry = async_get_entity_registry(hass)
     for entity in entity_registry.entities.values():
-        if entity.platform in ("switch", "light") and entity.entity_id.startswith(("switch.", "light.")):
+        if (entity.domain in ("switch", "light") and 
+            entity.entity_id not in switch_entities and
+            not any(exclude in entity.entity_id for exclude in [
+                "_linkquality", "_update_available", "_update_state",
+                "_battery", "_signal_strength", "_voltage", "_power",
+                "_energy", "_current", "_temperature", "_humidity"
+            ])):
             switch_entities.append(entity.entity_id)
     
     return sorted(switch_entities)
@@ -64,10 +82,19 @@ class SwitchEnergyStatisticsConfigFlow(config_entries.ConfigFlow, domain=DOMAIN)
             gang_count = user_input[CONF_GANG_COUNT]
             name = user_input[CONF_NAME]
             
-            # Validate switch entity exists
-            if switch_entity not in await get_switch_entities(self.hass):
+            # Validate switch entity exists (check both registry and current states)
+            available_entities = await get_switch_entities(self.hass)
+            current_states = [entity_id for entity_id in self.hass.states.async_entity_ids() 
+                            if entity_id.startswith(("switch.", "light."))]
+            all_entities = list(set(available_entities + current_states))
+            
+            if switch_entity not in all_entities:
                 errors[CONF_SWITCH_ENTITY] = "invalid_switch_entity"
             else:
+                # Check if entity actually exists in current states
+                if self.hass.states.get(switch_entity) is None:
+                    _LOGGER.warning("Selected entity %s exists in registry but not in current states", switch_entity)
+                
                 # Store data for next step
                 self._switch_entity = switch_entity
                 self._gang_count = gang_count
@@ -79,7 +106,11 @@ class SwitchEnergyStatisticsConfigFlow(config_entries.ConfigFlow, domain=DOMAIN)
         # Get available switch entities
         switch_entities = await get_switch_entities(self.hass)
         
+        _LOGGER.debug("Found %d switch entities: %s", len(switch_entities), switch_entities)
+        
         if not switch_entities:
+            _LOGGER.warning("No switch entities found. Available entity domains: %s", 
+                          list(set(entity_id.split('.')[0] for entity_id in self.hass.states.async_entity_ids())))
             return self.async_abort(reason="no_switch_entities")
 
         data_schema = vol.Schema(

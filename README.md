@@ -8,19 +8,7 @@ A Home Assistant custom integration for tracking energy consumption of multi-gan
 
 ## 🚀 Quick Setup
 
-### For Repository Owner (First Time)
-```bash
-# 1. Push to GitHub
-git add .
-git commit -m "Add Switch Energy Statistics integration"
-git push origin main
-
-# 2. Create first release for HACS
-git tag v1.0.0
-git push origin v1.0.0
-```
-
-### For Users
+## For Users
 
 1. **Add to HACS**: Add `https://github.com/danielulisses/zigbee-devices` as a custom repository in HACS
 2. **Install**: Search for "Switch Energy Statistics Estimation" and install
