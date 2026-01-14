@@ -5,6 +5,25 @@
 1. **HACS Installed**: Ensure you have HACS installed in your Home Assistant instance
    - If not installed, follow: https://hacs.xyz/docs/setup/download
 
+## First Time Setup (Repository Owner)
+
+If you're setting up this repository for the first time:
+
+1. **Push to GitHub** (if not already done):
+   ```bash
+   git add .
+   git commit -m "Add Switch Energy Statistics integration"
+   git push origin main
+   ```
+
+2. **Create the first release**:
+   ```bash
+   git tag v1.0.0
+   git push origin v1.0.0
+   ```
+
+3. **Wait for GitHub Actions**: The release workflow will automatically create a ZIP file and GitHub release
+
 ## Installation Steps
 
 ### Step 1: Add Custom Repository
@@ -44,10 +63,15 @@
 
 ## Troubleshooting HACS Installation
 
-### Repository Not Found
-- Ensure the repository URL is correct
-- Check that the repository is public
-- Wait a few minutes and try again
+### Repository Not Found or No Releases
+- **Create a release**: The repository needs at least one GitHub release
+  ```bash
+  git tag v1.0.0
+  git push origin v1.0.0
+  ```
+- **Wait for Actions**: GitHub Actions will create the release (may take 1-2 minutes)
+- **Check repository is public**: Ensure the GitHub repository is publicly accessible
+- **Verify URL**: Double-check the repository URL is correct
 
 ### Integration Not Appearing
 - Make sure you added it as **Integration** category (not Plugin)
