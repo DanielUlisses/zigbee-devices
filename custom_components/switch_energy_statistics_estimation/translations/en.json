@@ -51,8 +51,8 @@
   "options": {
     "step": {
       "init": {
-        "title": "Update Gang Power Settings",
-        "description": "Update the power consumption settings for each gang",
+        "title": "Update Power Settings",
+        "description": "Update the power consumption settings for each gang: {gang_entities}",
         "data": {
           "gang_1_power": "Gang 1 Power (W)",
           "gang_2_power": "Gang 2 Power (W)",

@@ -229,23 +229,42 @@ class SwitchEnergyStatisticsOptionsFlow(config_entries.OptionsFlow):
 
     def __init__(self, config_entry: config_entries.ConfigEntry):
         """Initialize options flow."""
-        self.config_entry = config_entry
+        self._config_entry = config_entry
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Manage the options."""
         if user_input is not None:
-            return self.async_create_entry(title="", data=user_input)
+            # Update gang power values
+            updated_gang_powers = {}
+            gang_count = int(self._config_entry.data[CONF_GANG_COUNT])
+            
+            for gang in range(1, gang_count + 1):
+                power_key = f"gang_{gang}_power"
+                if power_key in user_input:
+                    updated_gang_powers[gang] = user_input[power_key]
+            
+            # Update the config entry data
+            new_data = dict(self._config_entry.data)
+            new_data[CONF_GANG_POWER] = updated_gang_powers
+            
+            self.hass.config_entries.async_update_entry(
+                self._config_entry, data=new_data
+            )
+            
+            return self.async_create_entry(title="", data={})
 
-        gang_count = int(self.config_entry.data[CONF_GANG_COUNT])  # Convert to integer
-        current_gang_powers = self.config_entry.data.get(CONF_GANG_POWER, {})
+        gang_count = int(self._config_entry.data[CONF_GANG_COUNT])
+        current_gang_powers = self._config_entry.data.get(CONF_GANG_POWER, {})
+        gang_entities = self._config_entry.data.get("gang_entities", {})
 
-        # Create schema for gang power configuration
+        # Create schema for gang power configuration with entity names
         gang_schema = {}
         for gang in range(1, gang_count + 1):
             power_key = f"gang_{gang}_power"
             current_power = current_gang_powers.get(gang, DEFAULT_GANG_POWER)
+            
             gang_schema[vol.Required(power_key, default=current_power)] = (
                 selector.NumberSelector(
                     selector.NumberSelectorConfig(
@@ -261,4 +280,28 @@ class SwitchEnergyStatisticsOptionsFlow(config_entries.OptionsFlow):
         return self.async_show_form(
             step_id="init",
             data_schema=vol.Schema(gang_schema),
+            description_placeholders={
+                "gang_entities": ", ".join(
+                    f"Gang {gang}: {self._get_entity_friendly_name(entity_id)}"
+                    for gang, entity_id in gang_entities.items()
+                ),
+            },
         )
+
+    def _get_entity_friendly_name(self, entity_id: str) -> str:
+        """Get friendly name for an entity."""
+        if not entity_id or entity_id.startswith("gang_"):
+            return entity_id
+            
+        # Try to get from entity registry first
+        entity_registry = async_get_entity_registry(self.hass)
+        if entity_entry := entity_registry.async_get(entity_id):
+            if entity_entry.name:
+                return entity_entry.name
+        
+        # Fall back to state friendly name
+        if state := self.hass.states.get(entity_id):
+            return state.attributes.get("friendly_name", entity_id.split(".")[-1].replace("_", " ").title())
+        
+        # Final fallback
+        return entity_id.split(".")[-1].replace("_", " ").title()

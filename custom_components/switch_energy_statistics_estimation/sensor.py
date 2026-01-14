@@ -76,6 +76,9 @@ async def async_setup_entry(
     for gang, switch_entity in gang_entities.items():
         gang_power = gang_powers.get(gang, 10.0)
         
+        # Get friendly name for the entity
+        entity_friendly_name = get_entity_friendly_name(hass, switch_entity)
+        
         # Create energy sensors for different periods
         entities.extend([
             SwitchEnergyStatisticsSensor(
@@ -85,6 +88,7 @@ async def async_setup_entry(
                 gang,
                 gang_power,
                 name,
+                entity_friendly_name,
                 PERIOD_DAILY,
                 store,
             ),
@@ -95,6 +99,7 @@ async def async_setup_entry(
                 gang,
                 gang_power,
                 name,
+                entity_friendly_name,
                 PERIOD_WEEKLY,
                 store,
             ),
@@ -105,6 +110,7 @@ async def async_setup_entry(
                 gang,
                 gang_power,
                 name,
+                entity_friendly_name,
                 PERIOD_MONTHLY,
                 store,
             ),
@@ -116,11 +122,32 @@ async def async_setup_entry(
                 gang,
                 gang_power,
                 name,
+                entity_friendly_name,
                 store,
             ),
         ])
     
     async_add_entities(entities, True)
+
+
+def get_entity_friendly_name(hass: HomeAssistant, entity_id: str) -> str:
+    """Get friendly name for an entity."""
+    if not entity_id:
+        return "Unknown"
+        
+    # Try to get from entity registry first
+    from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry
+    entity_registry = async_get_entity_registry(hass)
+    if entity_entry := entity_registry.async_get(entity_id):
+        if entity_entry.name:
+            return entity_entry.name
+    
+    # Fall back to state friendly name
+    if state := hass.states.get(entity_id):
+        return state.attributes.get("friendly_name", entity_id.split(".")[-1].replace("_", " ").title())
+    
+    # Final fallback
+    return entity_id.split(".")[-1].replace("_", " ").title()
 
 
 class SwitchEnergyStatisticsSensor(RestoreEntity, SensorEntity):
@@ -134,6 +161,7 @@ class SwitchEnergyStatisticsSensor(RestoreEntity, SensorEntity):
         gang: int,
         gang_power: float,
         name: str,
+        entity_friendly_name: str,
         period: str,
         store: Store,
     ) -> None:
@@ -144,6 +172,7 @@ class SwitchEnergyStatisticsSensor(RestoreEntity, SensorEntity):
         self._gang = gang
         self._gang_power = gang_power
         self._base_name = name
+        self._entity_friendly_name = entity_friendly_name
         self._period = period
         self._store = store
         
@@ -168,8 +197,8 @@ class SwitchEnergyStatisticsSensor(RestoreEntity, SensorEntity):
             PERIOD_MONTHLY: SUFFIX_ENERGY_MONTHLY,
         }[period]
         
-        self._attr_unique_id = f"{DOMAIN}_{entry_id}_gang_{gang}_{period_suffix}"
-        self._attr_name = f"{name} Gang {gang} Energy {period.title()}"
+        self._attr_unique_id = f"{DOMAIN}_{entry_id}_{switch_entity}_{period_suffix}"
+        self._attr_name = f"{name} {entity_friendly_name} Energy {period.title()}"
         
         # Setup state change tracking
         self._unsubscribe_state_listener = None
@@ -334,6 +363,7 @@ class SwitchPowerSensor(RestoreEntity, SensorEntity):
         gang: int,
         gang_power: float,
         name: str,
+        entity_friendly_name: str,
         store: Store,
     ) -> None:
         """Initialize the sensor."""
@@ -343,6 +373,7 @@ class SwitchPowerSensor(RestoreEntity, SensorEntity):
         self._gang = gang
         self._gang_power = gang_power
         self._base_name = name
+        self._entity_friendly_name = entity_friendly_name
         self._store = store
         
         self._attr_device_class = SensorDeviceClass.POWER
@@ -353,8 +384,8 @@ class SwitchPowerSensor(RestoreEntity, SensorEntity):
         self._is_on = False
         
         # Set up unique ID and entity ID
-        self._attr_unique_id = f"{DOMAIN}_{entry_id}_gang_{gang}_{SUFFIX_POWER}"
-        self._attr_name = f"{name} Gang {gang} Power"
+        self._attr_unique_id = f"{DOMAIN}_{entry_id}_{switch_entity}_{SUFFIX_POWER}"
+        self._attr_name = f"{name} {entity_friendly_name} Power"
         
         # Setup state change tracking
         self._unsubscribe_state_listener = None
