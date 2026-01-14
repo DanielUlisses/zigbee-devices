@@ -3,16 +3,29 @@
     "step": {
       "user": {
         "title": "Switch Energy Statistics Configuration",
-        "description": "Configure energy monitoring for your switch. For multi-gang devices, select ANY gang of the device (e.g. switch.cozinha, switch.living, etc.) - the integration will track all gangs individually.",
+        "description": "Configure energy monitoring for your switches. You'll select individual entities for each gang in the next step.",
         "data": {
-          "switch_entity": "Switch Entity (any gang from your multi-gang device)",
-          "gang_count": "Number of Gangs (total gangs in the device)",
-          "name": "Name (friendly name for this device)"
+          "gang_count": "Number of Gangs (how many switches to monitor)",
+          "name": "Name (friendly name for this monitoring group)"
+        }
+      },
+      "gang_entities": {
+        "title": "Gang Entity Selection",
+        "description": "Select the switch/light entity for each gang. Each gang can be any switch or light entity in your Home Assistant.",
+        "data": {
+          "gang_1_entity": "Gang 1 Entity",
+          "gang_2_entity": "Gang 2 Entity",
+          "gang_3_entity": "Gang 3 Entity",
+          "gang_4_entity": "Gang 4 Entity",
+          "gang_5_entity": "Gang 5 Entity",
+          "gang_6_entity": "Gang 6 Entity",
+          "gang_7_entity": "Gang 7 Entity",
+          "gang_8_entity": "Gang 8 Entity"
         }
       },
       "gang_config": {
         "title": "Gang Power Configuration",
-        "description": "Set power consumption for each gang of your multi-gang switch. Each gang represents a separate switch channel that can be controlled independently.",
+        "description": "Set power consumption in watts for each gang. This is the power consumed when the switch is ON.",
         "data": {
           "gang_1_power": "Gang 1 Power (W)",
           "gang_2_power": "Gang 2 Power (W)",
@@ -27,6 +40,7 @@
     },
     "error": {
       "invalid_switch_entity": "Selected switch entity is not valid or not found",
+      "required": "This field is required",
       "no_switch_entities": "No switch entities found. Please ensure you have switches or lights configured in Home Assistant."
     },
     "abort": {

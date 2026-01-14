@@ -9,9 +9,10 @@ VERSION = "1.0.0"
 PLATFORMS = ["sensor"]
 
 # Configuration keys
-CONF_SWITCH_ENTITY = "switch_entity"
+CONF_SWITCH_ENTITY = "switch_entity"  # Legacy - kept for backward compatibility
 CONF_GANG_COUNT = "gang_count"
 CONF_GANG_POWER = "gang_power"
+CONF_GANG_ENTITIES = "gang_entities"
 CONF_NAME = "name"
 
 # Default values

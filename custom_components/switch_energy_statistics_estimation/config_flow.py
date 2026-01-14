@@ -67,9 +67,9 @@ class SwitchEnergyStatisticsConfigFlow(config_entries.ConfigFlow, domain=DOMAIN)
 
     def __init__(self):
         """Initialize the config flow."""
-        self._switch_entity = None
         self._gang_count = None
         self._name = None
+        self._gang_entities = {}
         self._gang_powers = {}
 
     async def async_step_user(
@@ -79,50 +79,18 @@ class SwitchEnergyStatisticsConfigFlow(config_entries.ConfigFlow, domain=DOMAIN)
         errors = {}
         
         if user_input is not None:
-            switch_entity = user_input[CONF_SWITCH_ENTITY]
-            gang_count = int(user_input[CONF_GANG_COUNT])  # Convert to integer
+            gang_count = int(user_input[CONF_GANG_COUNT])
             name = user_input[CONF_NAME]
             
-            # Validate switch entity exists (check both registry and current states)
-            available_entities = await get_switch_entities(self.hass)
-            current_states = [state.entity_id for state in self.hass.states.async_all() 
-                            if state.entity_id.startswith(("switch.", "light."))]
-            all_entities = list(set(available_entities + current_states))
+            # Store data for next step
+            self._gang_count = gang_count
+            self._name = name
             
-            if switch_entity not in all_entities:
-                errors[CONF_SWITCH_ENTITY] = "invalid_switch_entity"
-            else:
-                # Check if entity actually exists in current states
-                if self.hass.states.get(switch_entity) is None:
-                    _LOGGER.warning("Selected entity %s exists in registry but not in current states", switch_entity)
-                
-                # Store data for next step
-                self._switch_entity = switch_entity
-                self._gang_count = gang_count
-                self._name = name
-                
-                # Move to gang configuration step
-                return await self.async_step_gang_config()
-
-        # Get available switch entities
-        switch_entities = await get_switch_entities(self.hass)
-        
-        _LOGGER.debug("Found %d switch entities: %s", len(switch_entities), switch_entities)
-        
-        if not switch_entities:
-            all_entity_ids = [state.entity_id for state in self.hass.states.async_all()]
-            domains = list(set(entity_id.split('.')[0] for entity_id in all_entity_ids))
-            _LOGGER.warning("No switch entities found. Available entity domains: %s", domains)
-            return self.async_abort(reason="no_switch_entities")
+            # Move to gang entity selection step
+            return await self.async_step_gang_entities()
 
         data_schema = vol.Schema(
             {
-                vol.Required(CONF_SWITCH_ENTITY): selector.SelectSelector(
-                    selector.SelectSelectorConfig(
-                        options=switch_entities,
-                        mode=selector.SelectSelectorMode.DROPDOWN,
-                    )
-                ),
                 vol.Required(CONF_GANG_COUNT, default=1): selector.NumberSelector(
                     selector.NumberSelectorConfig(
                         min=MIN_GANG_COUNT,
@@ -137,6 +105,65 @@ class SwitchEnergyStatisticsConfigFlow(config_entries.ConfigFlow, domain=DOMAIN)
 
         return self.async_show_form(
             step_id="user", data_schema=data_schema, errors=errors
+        )
+
+    async def async_step_gang_entities(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle gang entity selection."""
+        errors = {}
+        
+        if user_input is not None:
+            # Validate all selected entities exist
+            available_entities = await get_switch_entities(self.hass)
+            current_states = [state.entity_id for state in self.hass.states.async_all() 
+                            if state.entity_id.startswith(("switch.", "light."))]
+            all_entities = list(set(available_entities + current_states))
+            
+            gang_entities = {}
+            for gang in range(1, self._gang_count + 1):
+                entity_key = f"gang_{gang}_entity"
+                selected_entity = user_input.get(entity_key)
+                
+                if not selected_entity:
+                    errors[entity_key] = "required"
+                elif selected_entity not in all_entities:
+                    errors[entity_key] = "invalid_switch_entity"
+                else:
+                    gang_entities[gang] = selected_entity
+            
+            if not errors:
+                # Store gang entities for next step
+                self._gang_entities = gang_entities
+                # Move to power configuration step
+                return await self.async_step_gang_config()
+        
+        # Get available switch entities
+        switch_entities = await get_switch_entities(self.hass)
+        
+        if not switch_entities:
+            return self.async_abort(reason="no_switch_entities")
+        
+        # Create schema for gang entity selection
+        gang_schema = {}
+        for gang in range(1, self._gang_count + 1):
+            entity_key = f"gang_{gang}_entity"
+            gang_schema[vol.Required(entity_key)] = selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    options=switch_entities,
+                    mode=selector.SelectSelectorMode.DROPDOWN,
+                )
+            )
+
+        data_schema = vol.Schema(gang_schema)
+
+        return self.async_show_form(
+            step_id="gang_entities",
+            data_schema=data_schema,
+            errors=errors,
+            description_placeholders={
+                "gang_count": str(self._gang_count),
+            },
         )
 
     async def async_step_gang_config(
@@ -156,10 +183,10 @@ class SwitchEnergyStatisticsConfigFlow(config_entries.ConfigFlow, domain=DOMAIN)
             return self.async_create_entry(
                 title=self._name,
                 data={
-                    CONF_SWITCH_ENTITY: self._switch_entity,
                     CONF_GANG_COUNT: self._gang_count,
                     CONF_NAME: self._name,
                     CONF_GANG_POWER: self._gang_powers,
+                    "gang_entities": self._gang_entities,  # Store individual gang entities
                 },
             )
 
@@ -186,7 +213,6 @@ class SwitchEnergyStatisticsConfigFlow(config_entries.ConfigFlow, domain=DOMAIN)
             data_schema=data_schema,
             errors=errors,
             description_placeholders={
-                "switch_entity": self._switch_entity,
                 "gang_count": str(self._gang_count),
             },
         )

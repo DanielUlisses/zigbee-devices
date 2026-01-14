@@ -51,10 +51,21 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the Switch Energy Statistics sensors."""
-    switch_entity = entry.data[CONF_SWITCH_ENTITY]
     gang_count = entry.data[CONF_GANG_COUNT]
     gang_powers = entry.data[CONF_GANG_POWER]
     name = entry.data[CONF_NAME]
+    gang_entities = entry.data.get("gang_entities", {})
+    
+    # Backward compatibility: if no gang_entities, use the old switch_entity approach
+    if not gang_entities and CONF_SWITCH_ENTITY in entry.data:
+        switch_entity = entry.data[CONF_SWITCH_ENTITY]
+        # Create fake gang entities (this won't work well, but maintains some backward compatibility)
+        gang_entities = {1: switch_entity}
+        gang_count = 1
+    
+    if not gang_entities:
+        _LOGGER.error("No gang entities configured for entry %s", entry.entry_id)
+        return
     
     # Create storage for historical data
     store = Store(hass, STORAGE_VERSION, f"{STORAGE_KEY}_{entry.entry_id}")
@@ -62,7 +73,7 @@ async def async_setup_entry(
     # Create sensors for each gang
     entities = []
     
-    for gang in range(1, gang_count + 1):
+    for gang, switch_entity in gang_entities.items():
         gang_power = gang_powers.get(gang, 10.0)
         
         # Create energy sensors for different periods
@@ -184,7 +195,9 @@ class SwitchEnergyStatisticsSensor(RestoreEntity, SensorEntity):
         # Initialize current state
         switch_state = self.hass.states.get(self._switch_entity)
         if switch_state:
-            await self._update_from_switch_state(switch_state.state)
+            self._is_on = switch_state.state == STATE_ON
+            self._last_changed = dt_util.utcnow()  # Set initial timestamp
+            _LOGGER.debug("Gang %d: Initial state: %s", self._gang, "ON" if self._is_on else "OFF")
 
     async def async_will_remove_from_hass(self) -> None:
         """Run when entity will be removed from hass."""
@@ -225,19 +238,32 @@ class SwitchEnergyStatisticsSensor(RestoreEntity, SensorEntity):
         """Update energy calculation from switch state."""
         now = dt_util.utcnow()
         
-        # Calculate energy since last update
+        # Calculate energy since last update (only if switch was ON)
         if self._last_changed and self._is_on:
-            time_diff = (now - self._last_changed).total_seconds() / 3600  # Convert to hours
-            energy_consumed = self._gang_power * time_diff
-            self._energy_value += energy_consumed
+            time_diff_hours = (now - self._last_changed).total_seconds() / 3600  # Convert to hours
+            energy_consumed_wh = self._gang_power * time_diff_hours  # Wh = W × hours
             
-            # Update historical data
-            await self._update_historical_data(energy_consumed, now)
+            if energy_consumed_wh > 0:
+                self._energy_value += energy_consumed_wh
+                _LOGGER.debug(
+                    "Gang %d: Switch was ON for %.3f hours, consumed %.3f Wh (%.1f W), total: %.3f Wh",
+                    self._gang, time_diff_hours, energy_consumed_wh, self._gang_power, self._energy_value
+                )
+                
+                # Update historical data
+                await self._update_historical_data(energy_consumed_wh, now)
         
         # Update current state
+        previous_state = self._is_on
         self._is_on = state == STATE_ON
         self._last_state = state
         self._last_changed = now
+        
+        # Log state changes
+        if previous_state != self._is_on:
+            _LOGGER.debug("Gang %d: State changed from %s to %s", 
+                         self._gang, "ON" if previous_state else "OFF", 
+                         "ON" if self._is_on else "OFF")
         
         # Reset energy for new period if needed
         await self._check_period_reset(now)
