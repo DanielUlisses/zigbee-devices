@@ -80,7 +80,7 @@ class SwitchEnergyStatisticsConfigFlow(config_entries.ConfigFlow, domain=DOMAIN)
         
         if user_input is not None:
             switch_entity = user_input[CONF_SWITCH_ENTITY]
-            gang_count = user_input[CONF_GANG_COUNT]
+            gang_count = int(user_input[CONF_GANG_COUNT])  # Convert to integer
             name = user_input[CONF_NAME]
             
             # Validate switch entity exists (check both registry and current states)
@@ -212,7 +212,7 @@ class SwitchEnergyStatisticsOptionsFlow(config_entries.OptionsFlow):
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
 
-        gang_count = self.config_entry.data[CONF_GANG_COUNT]
+        gang_count = int(self.config_entry.data[CONF_GANG_COUNT])  # Convert to integer
         current_gang_powers = self.config_entry.data.get(CONF_GANG_POWER, {})
 
         # Create schema for gang power configuration
