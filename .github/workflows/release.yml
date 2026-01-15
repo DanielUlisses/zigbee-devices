@@ -165,26 +165,42 @@ jobs:
           RELEASE_TITLE="Component Release $(date +'%Y-%m-%d')"
           NOTES="## Component Releases\\n\\n"
 
+          # Get latest component tags for commit range
+          SWITCH_TAG="${{ steps.latest_tags.outputs.SWITCH_TAG }}"
+          ENERGY_TAG="${{ steps.latest_tags.outputs.ENERGY_TAG }}"
+
           if [ "${{ needs.detect-changes.outputs.switch_changed }}" = "true" ]; then
             NOTES+="### 🔌 Switch Energy Statistics Estimation ${{ needs.detect-changes.outputs.switch_tag }}\\n\\n"
-            NOTES+="Multi-gang switch energy consumption tracking with Home Assistant Energy Dashboard integration.\\n\\n"
-            NOTES+="**Features:**\\n"
-            NOTES+="- Multi-gang switch support (1-8 gangs)\\n"
-            NOTES+="- Energy consumption tracking (daily, weekly, monthly)\\n"
-            NOTES+="- Configurable power consumption per gang\\n"
-            NOTES+="- Historical data persistence\\n\\n"
+            
+            # Get commit messages for switch component
+            if [ -n "$SWITCH_TAG" ]; then
+              SWITCH_COMMITS=$(git log --oneline --no-merges ${SWITCH_TAG}..HEAD -- custom_components/switch_energy_statistics_estimation/ | sed 's/^/- /' | sed 's/$/\\n/' | tr -d '\\n')
+              if [ -n "$SWITCH_COMMITS" ]; then
+                NOTES+="**Changes:**\\n"
+                NOTES+="$SWITCH_COMMITS\\n"
+              fi
+            else
+              NOTES+="**Changes:**\\n"
+              NOTES+="- Initial release\\n"
+            fi
+            NOTES+="\\n"
           fi
 
           if [ "${{ needs.detect-changes.outputs.energy_report_changed }}" = "true" ]; then
             NOTES+="### ⚡ Energy Generation Report ${{ needs.detect-changes.outputs.energy_report_tag }}\\n\\n"
-            NOTES+="Comprehensive solar energy generation reporting with interactive charts and billing period management.\\n\\n"
-            NOTES+="**Features:**\\n"
-            NOTES+="- Solar energy tracking with flexible billing periods\\n"
-            NOTES+="- Grid consumption and injection monitoring\\n"
-            NOTES+="- Cumulative balance tracking with utility companies\\n"
-            NOTES+="- Interactive ApexCharts visualizations\\n"
-            NOTES+="- Service integration for easy data entry\\n"
-            NOTES+="- Manual and period-based solar data entry\\n\\n"
+            
+            # Get commit messages for energy report component  
+            if [ -n "$ENERGY_TAG" ]; then
+              ENERGY_COMMITS=$(git log --oneline --no-merges ${ENERGY_TAG}..HEAD -- custom_components/energy_generation_report/ | sed 's/^/- /' | sed 's/$/\\n/' | tr -d '\\n')
+              if [ -n "$ENERGY_COMMITS" ]; then
+                NOTES+="**Changes:**\\n"
+                NOTES+="$ENERGY_COMMITS\\n"
+              fi
+            else
+              NOTES+="**Changes:**\\n"
+              NOTES+="- Initial release\\n"
+            fi
+            NOTES+="\\n"
           fi
 
           if [ "${{ needs.detect-changes.outputs.switch_changed }}" = "false" ] && [ "${{ needs.detect-changes.outputs.energy_report_changed }}" = "false" ]; then
