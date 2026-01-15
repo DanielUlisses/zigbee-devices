@@ -239,36 +239,30 @@ jobs:
           echo -e "$NOTES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
+      - name: Prepare release assets
+        id: prepare_assets
+        run: |
+          ASSETS=""
+          if [ "${{ needs.detect-changes.outputs.switch_changed }}" = "true" ]; then
+            ASSETS+="switch_energy_statistics_estimation-${{ needs.detect-changes.outputs.switch_tag }}.zip"$'\n'
+          fi
+          if [ "${{ needs.detect-changes.outputs.energy_report_changed }}" = "true" ]; then
+            ASSETS+="energy_generation_report-${{ needs.detect-changes.outputs.energy_report_tag }}.zip"$'\n'
+          fi
+          echo "RELEASE_ASSETS<<EOF" >> $GITHUB_OUTPUT
+          echo "$ASSETS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: component-release-${{ github.run_number }}
-          release_name: ${{ steps.release_notes.outputs.RELEASE_TITLE }}
+          name: ${{ steps.release_notes.outputs.RELEASE_TITLE }}
           draft: false
           prerelease: false
           body: ${{ steps.release_notes.outputs.RELEASE_NOTES }}
-
-      - name: Upload Switch Component ZIP
-        if: needs.detect-changes.outputs.switch_changed == 'true'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./switch_energy_statistics_estimation-${{ needs.detect-changes.outputs.switch_tag }}.zip
-          asset_name: switch_energy_statistics_estimation-${{ needs.detect-changes.outputs.switch_tag }}.zip
-          asset_content_type: application/zip
-
-      - name: Upload Energy Report Component ZIP
-        if: needs.detect-changes.outputs.energy_report_changed == 'true'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./energy_generation_report-${{ needs.detect-changes.outputs.energy_report_tag }}.zip
-          asset_name: energy_generation_report-${{ needs.detect-changes.outputs.energy_report_tag }}.zip
-          asset_content_type: application/zip
+          files: ${{ steps.prepare_assets.outputs.RELEASE_ASSETS }}
+          generate_release_notes: false
