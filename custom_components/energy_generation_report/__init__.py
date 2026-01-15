@@ -6,6 +6,7 @@ import logging
 from datetime import timedelta
 from typing import Any
 
+import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, ServiceCall
@@ -13,21 +14,12 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.storage import Store
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.util import dt as dt_util
-import voluptuous as vol
 
-from .const import (
-    DOMAIN,
-    STORAGE_KEY,
-    STORAGE_KEY_SOLAR,
-    STORAGE_VERSION,
-    SERVICE_ADD_BILLING_DATA,
-    SERVICE_UPDATE_BILLING_DATA,
-    SERVICE_DELETE_BILLING_DATA,
-    SERVICE_ADD_SOLAR_DATA,
-    SERVICE_UPDATE_SOLAR_DATA,
-    SERVICE_DELETE_SOLAR_DATA,
-    SERVICE_ADD_SOLAR_PERIOD_DATA,
-)
+from .const import (DOMAIN, SERVICE_ADD_BILLING_DATA, SERVICE_ADD_SOLAR_DATA,
+                    SERVICE_ADD_SOLAR_PERIOD_DATA, SERVICE_DELETE_BILLING_DATA,
+                    SERVICE_DELETE_SOLAR_DATA, SERVICE_UPDATE_BILLING_DATA,
+                    SERVICE_UPDATE_SOLAR_DATA, STORAGE_KEY, STORAGE_KEY_SOLAR,
+                    STORAGE_VERSION)
 
 _LOGGER = logging.getLogger(__name__)
 

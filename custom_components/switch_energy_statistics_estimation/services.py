@@ -7,7 +7,6 @@ from datetime import datetime
 from typing import Any
 
 import voluptuous as vol
-
 from homeassistant.core import HomeAssistant, ServiceCall, callback
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.service import async_register_admin_service

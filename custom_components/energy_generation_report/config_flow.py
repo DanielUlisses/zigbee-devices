@@ -6,26 +6,19 @@ import logging
 from typing import Any
 
 import voluptuous as vol
-
 from homeassistant import config_entries
 from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import selector
-from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry
+from homeassistant.helpers.entity_registry import \
+    async_get as async_get_entity_registry
 
-from .const import (
-    DOMAIN,
-    CONF_SOLAR_SENSOR,
-    CONF_INITIAL_GRID_CONSUMPTION,
-    CONF_INITIAL_GRID_INJECTION,
-    CONF_MINIMUM_BILLING_KWH,
-    CONF_INITIAL_BALANCE,
-    CONF_BILLING_PERIOD_DAYS,
-    DEFAULT_MINIMUM_BILLING_KWH,
-    DEFAULT_INITIAL_BALANCE,
-    DEFAULT_BILLING_PERIOD_DAYS,
-)
+from .const import (CONF_BILLING_PERIOD_DAYS, CONF_INITIAL_BALANCE,
+                    CONF_INITIAL_GRID_CONSUMPTION, CONF_INITIAL_GRID_INJECTION,
+                    CONF_MINIMUM_BILLING_KWH, CONF_SOLAR_SENSOR,
+                    DEFAULT_BILLING_PERIOD_DAYS, DEFAULT_INITIAL_BALANCE,
+                    DEFAULT_MINIMUM_BILLING_KWH, DOMAIN)
 
 _LOGGER = logging.getLogger(__name__)
 
