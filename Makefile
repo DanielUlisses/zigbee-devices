@@ -33,8 +33,8 @@ format: ## Format all Python code with Black and isort
 		echo "❌ Virtual environment not found. Run 'make setup' first."; \
 		exit 1; \
 	fi
-	@.venv/bin/isort custom_components/
 	@.venv/bin/black custom_components/
+	@.venv/bin/isort custom_components/
 
 lint: ## Run linting (black check) on Python code
 	@echo "🔍 Checking Python code formatting..."
