@@ -52,6 +52,23 @@ Comprehensive solar energy generation reporting with interactive charts and bill
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+### Development Setup
+
+For contributors, we provide a comprehensive development environment:
+
+```bash
+# Quick setup with Makefile
+make setup
+
+# See all available development commands
+make help
+
+# Format and lint your code
+make check-all
+```
+
+📖 See [DEVELOPMENT.md](DEVELOPMENT.md) for detailed development documentation.
+
 ## 🐛 Issues
 
 If you find a bug or have a feature request, please [open an issue](https://github.com/danielulisses/zigbee-devices/issues).

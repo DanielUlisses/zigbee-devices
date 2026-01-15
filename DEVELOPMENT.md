@@ -2,9 +2,21 @@
 
 This repository contains multiple Home Assistant custom integrations. Follow this guide to set up your development environment.
 
-## Quick Setup
+## Quick Setup with Make
 
-Run the setup script to install all development dependencies and pre-commit hooks:
+For the fastest setup, use the provided Makefile:
+
+```bash
+# Set up complete development environment
+make setup
+
+# Or see all available targets
+make help
+```
+
+## Quick Setup Script
+
+Alternatively, run the setup script directly:
 
 ```bash
 ./setup-dev.sh
@@ -58,29 +70,81 @@ The following hooks run automatically on every commit:
 
 ## Manual Commands
 
-Run individual tools manually when needed:
+### Using Make Targets
 
 ```bash
 # Format all Python files
-black custom_components/
-
-# Sort all imports
-isort custom_components/
+make format
 
 # Lint Python files
-flake8 custom_components/
+make lint
 
 # Lint YAML files
-yamllint .github/
+make yaml-lint
 
 # Run all pre-commit hooks
-pre-commit run --all-files
+make pre-commit
+
+# Validate component manifests
+make validate-manifests
+
+# Clean up generated files
+make clean
+
+# Show component versions
+make version
+
+# Show environment info
+make info
+```
+
+### Using Tools Directly
+
+```bash
+# Format all Python files
+.venv/bin/black custom_components/
+
+# Sort all imports
+.venv/bin/isort custom_components/
+
+# Lint Python files
+.venv/bin/flake8 custom_components/
+
+# Lint YAML files
+.venv/bin/yamllint .github/
+
+# Run all pre-commit hooks
+.venv/bin/pre-commit run --all-files
 
 # Run specific hook
-pre-commit run black
+.venv/bin/pre-commit run black
 ```
 
 ## Development Workflow
+
+### Using Make (Recommended)
+
+```bash
+# 1. Initial setup
+make setup
+
+# 2. Check code quality before committing
+make commit-check
+
+# 3. Format code
+make format
+
+# 4. Run linting
+make lint
+
+# 5. Run all quality checks
+make check-all
+
+# 6. See available commands
+make help
+```
+
+### Using Direct Commands
 
 1. **Make changes** to the code
 2. **Stage files**: `git add .`
