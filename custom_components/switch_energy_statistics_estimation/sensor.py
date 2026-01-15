@@ -6,8 +6,11 @@ import logging
 from datetime import datetime, timedelta
 from typing import Any
 
-from homeassistant.components.sensor import (SensorDeviceClass, SensorEntity,
-                                             SensorStateClass)
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+    SensorEntity,
+    SensorStateClass,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import STATE_OFF, STATE_ON, UnitOfEnergy, UnitOfPower
 from homeassistant.core import HomeAssistant, callback
@@ -17,11 +20,23 @@ from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
-from .const import (CONF_GANG_COUNT, CONF_GANG_POWER, CONF_NAME,
-                    CONF_SWITCH_ENTITY, DOMAIN, PERIOD_DAILY, PERIOD_MONTHLY,
-                    PERIOD_WEEKLY, STORAGE_KEY, STORAGE_VERSION,
-                    SUFFIX_ENERGY_DAILY, SUFFIX_ENERGY_MONTHLY,
-                    SUFFIX_ENERGY_WEEKLY, SUFFIX_POWER, UPDATE_INTERVAL)
+from .const import (
+    CONF_GANG_COUNT,
+    CONF_GANG_POWER,
+    CONF_NAME,
+    CONF_SWITCH_ENTITY,
+    DOMAIN,
+    PERIOD_DAILY,
+    PERIOD_MONTHLY,
+    PERIOD_WEEKLY,
+    STORAGE_KEY,
+    STORAGE_VERSION,
+    SUFFIX_ENERGY_DAILY,
+    SUFFIX_ENERGY_MONTHLY,
+    SUFFIX_ENERGY_WEEKLY,
+    SUFFIX_POWER,
+    UPDATE_INTERVAL,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -162,8 +177,9 @@ def get_entity_friendly_name(hass: HomeAssistant, entity_id: str) -> str:
         return "Unknown"
 
     # Try to get from entity registry first
-    from homeassistant.helpers.entity_registry import \
-        async_get as async_get_entity_registry
+    from homeassistant.helpers.entity_registry import (
+        async_get as async_get_entity_registry,
+    )
 
     entity_registry = async_get_entity_registry(hass)
     if entity_entry := entity_registry.async_get(entity_id):

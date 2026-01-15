@@ -11,12 +11,19 @@ from homeassistant.components import switch
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import selector
-from homeassistant.helpers.entity_registry import \
-    async_get as async_get_entity_registry
+from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry
 
-from .const import (CONF_GANG_COUNT, CONF_GANG_POWER, CONF_NAME,
-                    CONF_SWITCH_ENTITY, DEFAULT_GANG_POWER, DEFAULT_NAME,
-                    DOMAIN, MAX_GANG_COUNT, MIN_GANG_COUNT)
+from .const import (
+    CONF_GANG_COUNT,
+    CONF_GANG_POWER,
+    CONF_NAME,
+    CONF_SWITCH_ENTITY,
+    DEFAULT_GANG_POWER,
+    DEFAULT_NAME,
+    DOMAIN,
+    MAX_GANG_COUNT,
+    MIN_GANG_COUNT,
+)
 
 _LOGGER = logging.getLogger(__name__)
 

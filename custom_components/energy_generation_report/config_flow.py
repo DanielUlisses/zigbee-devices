@@ -11,14 +11,20 @@ from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import selector
-from homeassistant.helpers.entity_registry import \
-    async_get as async_get_entity_registry
+from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry
 
-from .const import (CONF_BILLING_PERIOD_DAYS, CONF_INITIAL_BALANCE,
-                    CONF_INITIAL_GRID_CONSUMPTION, CONF_INITIAL_GRID_INJECTION,
-                    CONF_MINIMUM_BILLING_KWH, CONF_SOLAR_SENSOR,
-                    DEFAULT_BILLING_PERIOD_DAYS, DEFAULT_INITIAL_BALANCE,
-                    DEFAULT_MINIMUM_BILLING_KWH, DOMAIN)
+from .const import (
+    CONF_BILLING_PERIOD_DAYS,
+    CONF_INITIAL_BALANCE,
+    CONF_INITIAL_GRID_CONSUMPTION,
+    CONF_INITIAL_GRID_INJECTION,
+    CONF_MINIMUM_BILLING_KWH,
+    CONF_SOLAR_SENSOR,
+    DEFAULT_BILLING_PERIOD_DAYS,
+    DEFAULT_INITIAL_BALANCE,
+    DEFAULT_MINIMUM_BILLING_KWH,
+    DOMAIN,
+)
 
 _LOGGER = logging.getLogger(__name__)
 

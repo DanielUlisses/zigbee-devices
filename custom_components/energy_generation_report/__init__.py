@@ -15,11 +15,19 @@ from homeassistant.helpers.storage import Store
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.util import dt as dt_util
 
-from .const import (DOMAIN, SERVICE_ADD_BILLING_DATA, SERVICE_ADD_SOLAR_DATA,
-                    SERVICE_ADD_SOLAR_PERIOD_DATA, SERVICE_DELETE_BILLING_DATA,
-                    SERVICE_DELETE_SOLAR_DATA, SERVICE_UPDATE_BILLING_DATA,
-                    SERVICE_UPDATE_SOLAR_DATA, STORAGE_KEY, STORAGE_KEY_SOLAR,
-                    STORAGE_VERSION)
+from .const import (
+    DOMAIN,
+    SERVICE_ADD_BILLING_DATA,
+    SERVICE_ADD_SOLAR_DATA,
+    SERVICE_ADD_SOLAR_PERIOD_DATA,
+    SERVICE_DELETE_BILLING_DATA,
+    SERVICE_DELETE_SOLAR_DATA,
+    SERVICE_UPDATE_BILLING_DATA,
+    SERVICE_UPDATE_SOLAR_DATA,
+    STORAGE_KEY,
+    STORAGE_KEY_SOLAR,
+    STORAGE_VERSION,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
