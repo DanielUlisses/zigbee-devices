@@ -36,13 +36,13 @@ format: ## Format all Python code with Black and isort
 	@.venv/bin/isort custom_components/
 	@.venv/bin/black custom_components/
 
-lint: ## Run linting (flake8) on Python code
-	@echo "🔍 Linting Python code..."
+lint: ## Run linting (black check) on Python code
+	@echo "🔍 Checking Python code formatting..."
 	@if [ ! -d ".venv" ]; then \
 		echo "❌ Virtual environment not found. Run 'make setup' first."; \
 		exit 1; \
 	fi
-	@.venv/bin/flake8 custom_components/
+	@.venv/bin/black --check --diff custom_components/
 
 yaml-lint: ## Lint YAML files
 	@echo "📝 Linting YAML files..."
@@ -132,9 +132,8 @@ quick-format: ## Quick format (isort then Black)
 	@.venv/bin/isort custom_components/ 2>/dev/null || echo "Run 'make setup' first"
 	@.venv/bin/black custom_components/ 2>/dev/null || echo "Run 'make setup' first"
 
-quick-lint: ## Quick lint check (flake8 only)
-	@.venv/bin/flake8 custom_components/ 2>/dev/null || echo "Run 'make setup' first"
-
+quick-lint: ## Quick lint check (black check only)
+	@.venv/bin/black --check custom_components/ 2>/dev/null || echo "Run 'make setup' first"
 # Version and info targets
 version: ## Show component versions
 	@echo "📦 Component Versions"

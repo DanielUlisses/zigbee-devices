@@ -24,7 +24,7 @@ Alternatively, run the setup script directly:
 
 This will:
 - Create a Python virtual environment (.venv)
-- Install development dependencies (black, isort, flake8, yamllint, pre-commit)
+- Install development dependencies (black, isort, yamllint, pre-commit)
 - Set up pre-commit hooks
 - Format all existing files
 
@@ -38,7 +38,7 @@ python3 -m venv .venv
 source .venv/bin/activate
 
 # Install dependencies
-pip install black isort flake8 yamllint pre-commit
+pip install black isort yamllint pre-commit
 
 # Install pre-commit hooks
 pre-commit install
@@ -51,7 +51,6 @@ The following hooks run automatically on every commit:
 ### Code Quality
 - **Black**: Python code formatting
 - **isort**: Import sorting (compatible with Black)
-- **flake8**: Python linting with relaxed line length (88 chars)
 
 ### File Quality
 - **trailing-whitespace**: Remove trailing whitespace
@@ -107,8 +106,8 @@ make info
 # Sort all imports
 .venv/bin/isort custom_components/
 
-# Lint Python files
-.venv/bin/flake8 custom_components/
+# Check Python formatting
+.venv/bin/black --check --diff custom_components/
 
 # Lint YAML files
 .venv/bin/yamllint .github/
@@ -171,7 +170,7 @@ In rare cases, you can skip hooks:
 git commit --no-verify -m "Emergency commit"
 
 # Skip specific hook
-SKIP=flake8 git commit -m "Skip flake8 only"
+SKIP=black git commit -m "Skip black only"
 ```
 
 ## CI/CD Integration

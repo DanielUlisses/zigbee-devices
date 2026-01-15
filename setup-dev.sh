@@ -25,7 +25,7 @@ source .venv/bin/activate
 # Install development dependencies
 echo "📦 Installing development dependencies..."
 pip install --upgrade pip
-pip install black isort flake8 yamllint pre-commit
+pip install black isort yamllint pre-commit
 
 # Install pre-commit hooks
 echo "🪝 Installing pre-commit hooks..."
@@ -51,4 +51,4 @@ echo "🔧 Useful commands:"
 echo "  - Run pre-commit manually: pre-commit run --all-files"
 echo "  - Format Python files: black custom_components/"
 echo "  - Sort imports: isort custom_components/"
-echo "  - Lint Python: flake8 custom_components/"
+echo "  - Format/lint Python: black custom_components/"
