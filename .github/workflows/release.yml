@@ -121,6 +121,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get latest component tags for release notes
+        id: get_tags_for_notes
+        run: |
+          # Get latest component-specific tags for release notes
+          SWITCH_TAG=$(git tag -l "switch-stats-v*" | sort -V | tail -1 || echo "")
+          ENERGY_TAG=$(git tag -l "energy-report-v*" | sort -V | tail -1 || echo "")
+
+          echo "SWITCH_TAG=${SWITCH_TAG}" >> $GITHUB_OUTPUT
+          echo "ENERGY_TAG=${ENERGY_TAG}" >> $GITHUB_OUTPUT
+          echo "Using switch tag for release notes: ${SWITCH_TAG}"
+          echo "Using energy tag for release notes: ${ENERGY_TAG}"
 
       - name: Create component tags
         run: |
@@ -166,18 +180,25 @@ jobs:
           NOTES="## Component Releases\\n\\n"
 
           # Get latest component tags for commit range
-          SWITCH_TAG="${{ steps.latest_tags.outputs.SWITCH_TAG }}"
-          ENERGY_TAG="${{ steps.latest_tags.outputs.ENERGY_TAG }}"
+          SWITCH_TAG="${{ steps.get_tags_for_notes.outputs.SWITCH_TAG }}"
+          ENERGY_TAG="${{ steps.get_tags_for_notes.outputs.ENERGY_TAG }}"
 
           if [ "${{ needs.detect-changes.outputs.switch_changed }}" = "true" ]; then
             NOTES+="### 🔌 Switch Energy Statistics Estimation ${{ needs.detect-changes.outputs.switch_tag }}\\n\\n"
             
             # Get commit messages for switch component
             if [ -n "$SWITCH_TAG" ]; then
-              SWITCH_COMMITS=$(git log --oneline --no-merges ${SWITCH_TAG}..HEAD -- custom_components/switch_energy_statistics_estimation/ | sed 's/^/- /' | sed 's/$/\\n/' | tr -d '\\n')
+              echo "Getting switch commits since ${SWITCH_TAG}"
+              SWITCH_COMMITS=$(git log --oneline --no-merges ${SWITCH_TAG}..HEAD -- custom_components/switch_energy_statistics_estimation/ | head -20)
               if [ -n "$SWITCH_COMMITS" ]; then
                 NOTES+="**Changes:**\\n"
-                NOTES+="$SWITCH_COMMITS\\n"
+                # Format commits properly for multiline output
+                while IFS= read -r line; do
+                  NOTES+="- ${line}\\n"
+                done <<< "$SWITCH_COMMITS"
+              else
+                NOTES+="**Changes:**\\n"
+                NOTES+="- Version update\\n"
               fi
             else
               NOTES+="**Changes:**\\n"
@@ -191,10 +212,17 @@ jobs:
             
             # Get commit messages for energy report component  
             if [ -n "$ENERGY_TAG" ]; then
-              ENERGY_COMMITS=$(git log --oneline --no-merges ${ENERGY_TAG}..HEAD -- custom_components/energy_generation_report/ | sed 's/^/- /' | sed 's/$/\\n/' | tr -d '\\n')
+              echo "Getting energy report commits since ${ENERGY_TAG}"
+              ENERGY_COMMITS=$(git log --oneline --no-merges ${ENERGY_TAG}..HEAD -- custom_components/energy_generation_report/ | head -20)
               if [ -n "$ENERGY_COMMITS" ]; then
                 NOTES+="**Changes:**\\n"
-                NOTES+="$ENERGY_COMMITS\\n"
+                # Format commits properly for multiline output
+                while IFS= read -r line; do
+                  NOTES+="- ${line}\\n"
+                done <<< "$ENERGY_COMMITS"
+              else
+                NOTES+="**Changes:**\\n"
+                NOTES+="- Version update\\n"
               fi
             else
               NOTES+="**Changes:**\\n"
