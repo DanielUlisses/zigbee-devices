@@ -199,10 +199,10 @@ jobs:
         run: |
           # Install act for local GitHub Actions testing
           curl https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash
-          
+
           # Add act to PATH
           export PATH="$PATH:/usr/local/bin"
-          
+
           # Test workflow syntax (dry-run only)
           act --list || {
             echo "ERROR: Workflow syntax validation failed"
