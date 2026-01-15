@@ -2,8 +2,11 @@ name: Release
 
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - main
+      - master
+    paths:
+      - "custom_components/**"
 
 permissions:
   contents: write
@@ -16,51 +19,100 @@ jobs:
       energy_report_changed: ${{ steps.changes.outputs.energy_report_changed }}
       switch_version: ${{ steps.changes.outputs.switch_version }}
       energy_report_version: ${{ steps.changes.outputs.energy_report_version }}
+      switch_tag: ${{ steps.changes.outputs.switch_tag }}
+      energy_report_tag: ${{ steps.changes.outputs.energy_report_tag }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Get previous tag
-        id: prev_tag
+      - name: Get latest component tags
+        id: latest_tags
         run: |
-          PREV_TAG=$(git tag --sort=-version:refname | sed -n '2p')
-          echo "PREV_TAG=${PREV_TAG}" >> $GITHUB_OUTPUT
-          echo "Previous tag: ${PREV_TAG}"
+          # Get latest component-specific tags
+          SWITCH_TAG=$(git tag -l "switch-stats-v*" | sort -V | tail -1 || echo "")
+          ENERGY_TAG=$(git tag -l "energy-report-v*" | sort -V | tail -1 || echo "")
+
+          echo "SWITCH_TAG=${SWITCH_TAG}" >> $GITHUB_OUTPUT
+          echo "ENERGY_TAG=${ENERGY_TAG}" >> $GITHUB_OUTPUT
+          echo "Latest switch tag: ${SWITCH_TAG}"
+          echo "Latest energy tag: ${ENERGY_TAG}"
 
       - name: Detect changes
         id: changes
         run: |
-          if [ -z "${{ steps.prev_tag.outputs.PREV_TAG }}" ]; then
-            echo "switch_changed=true" >> $GITHUB_OUTPUT
-            echo "energy_report_changed=true" >> $GITHUB_OUTPUT
-          else
-            SWITCH_CHANGES=$(git diff --name-only ${{ steps.prev_tag.outputs.PREV_TAG }} HEAD -- custom_components/switch_energy_statistics_estimation/)
-            ENERGY_CHANGES=$(git diff --name-only ${{ steps.prev_tag.outputs.PREV_TAG }} HEAD -- custom_components/energy_generation_report/)
-            
-            if [ -n "$SWITCH_CHANGES" ]; then
-              echo "switch_changed=true" >> $GITHUB_OUTPUT
-            else
-              echo "switch_changed=false" >> $GITHUB_OUTPUT
-            fi
-            
-            if [ -n "$ENERGY_CHANGES" ]; then
-              echo "energy_report_changed=true" >> $GITHUB_OUTPUT
-            else
-              echo "energy_report_changed=false" >> $GITHUB_OUTPUT
-            fi
-          fi
-
-          # Get versions from manifest files
+          # Get current versions from manifest files
           SWITCH_VERSION=$(grep '"version"' custom_components/switch_energy_statistics_estimation/manifest.json | cut -d'"' -f4)
           ENERGY_VERSION=$(grep '"version"' custom_components/energy_generation_report/manifest.json | cut -d'"' -f4)
 
           echo "switch_version=${SWITCH_VERSION}" >> $GITHUB_OUTPUT
           echo "energy_report_version=${ENERGY_VERSION}" >> $GITHUB_OUTPUT
 
-          echo "Switch changed: $([ -n "$SWITCH_CHANGES" ] && echo true || echo false)"
-          echo "Energy report changed: $([ -n "$ENERGY_CHANGES" ] && echo true || echo false)"
+          # Check if we have any previous tags to compare against
+          SWITCH_TAG="${{ steps.latest_tags.outputs.SWITCH_TAG }}"
+          ENERGY_TAG="${{ steps.latest_tags.outputs.ENERGY_TAG }}"
+
+          # Initialize change flags
+          SWITCH_CHANGED=false
+          ENERGY_CHANGED=false
+
+          # Check Switch component
+          if [ -z "$SWITCH_TAG" ]; then
+            echo "No previous switch tag found - initial release"
+            SWITCH_CHANGED=true
+          else
+            # Check if files changed since last component tag
+            SWITCH_FILE_CHANGES=$(git diff --name-only ${SWITCH_TAG} HEAD -- custom_components/switch_energy_statistics_estimation/ || echo "changes")
+            
+            if [ -n "$SWITCH_FILE_CHANGES" ]; then
+              # Check if version changed
+              PREV_SWITCH_VERSION=$(git show ${SWITCH_TAG}:custom_components/switch_energy_statistics_estimation/manifest.json | grep '"version"' | cut -d'"' -f4 || echo "0.0.0")
+              
+              if [ "$PREV_SWITCH_VERSION" != "$SWITCH_VERSION" ]; then
+                echo "Switch version changed: $PREV_SWITCH_VERSION -> $SWITCH_VERSION"
+                SWITCH_CHANGED=true
+              else
+                echo "Switch files changed but version unchanged ($SWITCH_VERSION)"
+              fi
+            else
+              echo "No switch component changes detected"
+            fi
+          fi
+
+          # Check Energy Report component  
+          if [ -z "$ENERGY_TAG" ]; then
+            echo "No previous energy tag found - initial release"
+            ENERGY_CHANGED=true
+          else
+            # Check if files changed since last component tag
+            ENERGY_FILE_CHANGES=$(git diff --name-only ${ENERGY_TAG} HEAD -- custom_components/energy_generation_report/ || echo "changes")
+            
+            if [ -n "$ENERGY_FILE_CHANGES" ]; then
+              # Check if version changed
+              PREV_ENERGY_VERSION=$(git show ${ENERGY_TAG}:custom_components/energy_generation_report/manifest.json | grep '"version"' | cut -d'"' -f4 || echo "0.0.0")
+              
+              if [ "$PREV_ENERGY_VERSION" != "$ENERGY_VERSION" ]; then
+                echo "Energy report version changed: $PREV_ENERGY_VERSION -> $ENERGY_VERSION"
+                ENERGY_CHANGED=true
+              else
+                echo "Energy report files changed but version unchanged ($ENERGY_VERSION)"
+              fi
+            else
+              echo "No energy report component changes detected"
+            fi
+          fi
+
+          # Set outputs
+          echo "switch_changed=${SWITCH_CHANGED}" >> $GITHUB_OUTPUT
+          echo "energy_report_changed=${ENERGY_CHANGED}" >> $GITHUB_OUTPUT
+
+          # Generate component tags
+          echo "switch_tag=switch-stats-v${SWITCH_VERSION}" >> $GITHUB_OUTPUT
+          echo "energy_report_tag=energy-report-v${ENERGY_VERSION}" >> $GITHUB_OUTPUT
+
+          echo "Final decision - Switch changed: ${SWITCH_CHANGED}"
+          echo "Final decision - Energy report changed: ${ENERGY_CHANGED}"
 
   release:
     runs-on: ubuntu-latest
@@ -70,9 +122,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Get version from tag
-        id: version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+      - name: Create component tags
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if [ "${{ needs.detect-changes.outputs.switch_changed }}" = "true" ]; then
+            SWITCH_TAG="${{ needs.detect-changes.outputs.switch_tag }}"
+            echo "Creating switch component tag: $SWITCH_TAG"
+            git tag -a "$SWITCH_TAG" -m "Switch Energy Statistics Estimation v${{ needs.detect-changes.outputs.switch_version }}"
+            git push origin "$SWITCH_TAG"
+          fi
+
+          if [ "${{ needs.detect-changes.outputs.energy_report_changed }}" = "true" ]; then
+            ENERGY_TAG="${{ needs.detect-changes.outputs.energy_report_tag }}"
+            echo "Creating energy report component tag: $ENERGY_TAG" 
+            git tag -a "$ENERGY_TAG" -m "Energy Generation Report v${{ needs.detect-changes.outputs.energy_report_version }}"
+            git push origin "$ENERGY_TAG"
+          fi
 
       - name: Create ZIP archives
         run: |
@@ -80,13 +147,13 @@ jobs:
 
           # Create switch component archive if changed
           if [ "${{ needs.detect-changes.outputs.switch_changed }}" = "true" ]; then
-            zip -r ../switch_energy_statistics_estimation-${{ steps.version.outputs.VERSION }}.zip switch_energy_statistics_estimation/
+            zip -r ../switch_energy_statistics_estimation-${{ needs.detect-changes.outputs.switch_tag }}.zip switch_energy_statistics_estimation/
             echo "Created switch component archive"
           fi
 
           # Create energy report component archive if changed  
           if [ "${{ needs.detect-changes.outputs.energy_report_changed }}" = "true" ]; then
-            zip -r ../energy_generation_report-${{ steps.version.outputs.VERSION }}.zip energy_generation_report/
+            zip -r ../energy_generation_report-${{ needs.detect-changes.outputs.energy_report_tag }}.zip energy_generation_report/
             echo "Created energy report component archive"
           fi
 
@@ -95,43 +162,64 @@ jobs:
       - name: Generate release notes
         id: release_notes
         run: |
-          NOTES="## Release ${{ steps.version.outputs.VERSION }}\n\n"
+          RELEASE_TITLE="Component Release $(date +'%Y-%m-%d')"
+          NOTES="## Component Releases\\n\\n"
 
           if [ "${{ needs.detect-changes.outputs.switch_changed }}" = "true" ]; then
-            NOTES+="### 🔌 Switch Energy Statistics Estimation v${{ needs.detect-changes.outputs.switch_version }}\n\n"
-            NOTES+="Multi-gang switch energy consumption tracking with Home Assistant Energy Dashboard integration.\n\n"
-            NOTES+="**Features:**\n"
-            NOTES+="- Multi-gang switch support (1-8 gangs)\n"
-            NOTES+="- Energy consumption tracking (daily, weekly, monthly)\n"
-            NOTES+="- Configurable power consumption per gang\n"
-            NOTES+="- Historical data persistence\n\n"
+            NOTES+="### 🔌 Switch Energy Statistics Estimation ${{ needs.detect-changes.outputs.switch_tag }}\\n\\n"
+            NOTES+="Multi-gang switch energy consumption tracking with Home Assistant Energy Dashboard integration.\\n\\n"
+            NOTES+="**Features:**\\n"
+            NOTES+="- Multi-gang switch support (1-8 gangs)\\n"
+            NOTES+="- Energy consumption tracking (daily, weekly, monthly)\\n"
+            NOTES+="- Configurable power consumption per gang\\n"
+            NOTES+="- Historical data persistence\\n\\n"
           fi
 
           if [ "${{ needs.detect-changes.outputs.energy_report_changed }}" = "true" ]; then
-            NOTES+="### ⚡ Energy Generation Report v${{ needs.detect-changes.outputs.energy_report_version }}\n\n"
-            NOTES+="Comprehensive solar energy generation reporting with interactive charts and billing period management.\n\n"
-            NOTES+="**Features:**\n"
-            NOTES+="- Solar energy tracking with flexible billing periods\n"
-            NOTES+="- Grid consumption and injection monitoring\n"
-            NOTES+="- Cumulative balance tracking with utility companies\n"
-            NOTES+="- Interactive ApexCharts visualizations\n"
-            NOTES+="- Service integration for easy data entry\n\n"
+            NOTES+="### ⚡ Energy Generation Report ${{ needs.detect-changes.outputs.energy_report_tag }}\\n\\n"
+            NOTES+="Comprehensive solar energy generation reporting with interactive charts and billing period management.\\n\\n"
+            NOTES+="**Features:**\\n"
+            NOTES+="- Solar energy tracking with flexible billing periods\\n"
+            NOTES+="- Grid consumption and injection monitoring\\n"
+            NOTES+="- Cumulative balance tracking with utility companies\\n"
+            NOTES+="- Interactive ApexCharts visualizations\\n"
+            NOTES+="- Service integration for easy data entry\\n"
+            NOTES+="- Manual and period-based solar data entry\\n\\n"
           fi
 
-          NOTES+="## Installation via HACS\n"
-          NOTES+="1. Add \`https://github.com/danielulisses/zigbee-devices\` as a custom repository in HACS\n"
-          NOTES+="2. Search for the component you want to install\n"
-          NOTES+="3. Install and restart Home Assistant\n"
-          NOTES+="4. Add the integration through Settings → Devices & Services\n\n"
+          if [ "${{ needs.detect-changes.outputs.switch_changed }}" = "false" ] && [ "${{ needs.detect-changes.outputs.energy_report_changed }}" = "false" ]; then
+            NOTES+="### No component changes detected\\n\\n"
+            NOTES+="This release contains infrastructure or documentation updates only.\\n\\n"
+          fi
 
-          NOTES+="## Manual Installation\n"
-          NOTES+="1. Download the appropriate ZIP file below\n"
-          NOTES+="2. Extract to your \`custom_components/\` directory\n"
-          NOTES+="3. Restart Home Assistant\n\n"
+          NOTES+="## Installation via HACS\\n"
+          NOTES+="1. Add \\`https://github.com/danielulisses/zigbee-devices\\` as a custom repository in HACS\\n"
+          NOTES+="2. Search for the component you want to install:\\n"
+          if [ "${{ needs.detect-changes.outputs.switch_changed }}" = "true" ]; then
+            NOTES+="   - \\\"Switch Energy Statistics Estimation\\\" (${{ needs.detect-changes.outputs.switch_tag }})\\n"
+          fi
+          if [ "${{ needs.detect-changes.outputs.energy_report_changed }}" = "true" ]; then
+            NOTES+="   - \\\"Energy Generation Report\\\" (${{ needs.detect-changes.outputs.energy_report_tag }})\\n"
+          fi
+          NOTES+="3. Install and restart Home Assistant\\n"
+          NOTES+="4. Add the integration through Settings → Devices & Services\\n\\n"
 
-          NOTES+="### What's Changed\n"
-          NOTES+="- See commit history for detailed changes"
+          NOTES+="## Manual Installation\\n"
+          if [ "${{ needs.detect-changes.outputs.switch_changed }}" = "true" ] || [ "${{ needs.detect-changes.outputs.energy_report_changed }}" = "true" ]; then
+            NOTES+="1. Download the appropriate ZIP file below:\\n"
+            if [ "${{ needs.detect-changes.outputs.switch_changed }}" = "true" ]; then
+              NOTES+="   - \\`switch_energy_statistics_estimation-${{ needs.detect-changes.outputs.switch_tag }}.zip\\`\\n"
+            fi
+            if [ "${{ needs.detect-changes.outputs.energy_report_changed }}" = "true" ]; then
+              NOTES+="   - \\`energy_generation_report-${{ needs.detect-changes.outputs.energy_report_tag }}.zip\\`\\n"
+            fi
+            NOTES+="2. Extract to your \\`custom_components/\\` directory\\n"
+            NOTES+="3. Restart Home Assistant\\n\\n"
+          else
+            NOTES+="No component packages available for this release.\\n\\n"
+          fi
 
+          echo "RELEASE_TITLE=${RELEASE_TITLE}" >> $GITHUB_OUTPUT
           echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
           echo -e "$NOTES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
@@ -142,8 +230,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ steps.version.outputs.VERSION }}
+          tag_name: component-release-${{ github.run_number }}
+          release_name: ${{ steps.release_notes.outputs.RELEASE_TITLE }}
           draft: false
           prerelease: false
           body: ${{ steps.release_notes.outputs.RELEASE_NOTES }}
@@ -155,8 +243,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./switch_energy_statistics_estimation-${{ steps.version.outputs.VERSION }}.zip
-          asset_name: switch_energy_statistics_estimation-${{ steps.version.outputs.VERSION }}.zip
+          asset_path: ./switch_energy_statistics_estimation-${{ needs.detect-changes.outputs.switch_tag }}.zip
+          asset_name: switch_energy_statistics_estimation-${{ needs.detect-changes.outputs.switch_tag }}.zip
           asset_content_type: application/zip
 
       - name: Upload Energy Report Component ZIP
@@ -166,6 +254,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./energy_generation_report-${{ steps.version.outputs.VERSION }}.zip
-          asset_name: energy_generation_report-${{ steps.version.outputs.VERSION }}.zip
+          asset_path: ./energy_generation_report-${{ needs.detect-changes.outputs.energy_report_tag }}.zip
+          asset_name: energy_generation_report-${{ needs.detect-changes.outputs.energy_report_tag }}.zip
           asset_content_type: application/zip
