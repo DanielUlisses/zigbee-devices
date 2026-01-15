@@ -1,4 +1,5 @@
 """Constants for the Switch Energy Statistics component."""
+
 from __future__ import annotations
 
 DOMAIN = "switch_energy_statistics"

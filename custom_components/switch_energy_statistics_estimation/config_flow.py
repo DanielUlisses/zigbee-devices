@@ -1,4 +1,5 @@
 """Config flow for Switch Energy Statistics."""
+
 from __future__ import annotations
 
 import logging
@@ -31,31 +32,55 @@ _LOGGER = logging.getLogger(__name__)
 async def get_switch_entities(hass: HomeAssistant) -> list[str]:
     """Get all available switch entities."""
     switch_entities = []
-    
+
     # Get entities from states (includes all active entities)
     for state in hass.states.async_all():
         entity_id = state.entity_id
         if entity_id.startswith(("switch.", "light.")):
             # Exclude certain entity types that aren't real switches
-            if not any(exclude in entity_id for exclude in [
-                "_linkquality", "_update_available", "_update_state",
-                "_battery", "_signal_strength", "_voltage", "_power",
-                "_energy", "_current", "_temperature", "_humidity"
-            ]):
+            if not any(
+                exclude in entity_id
+                for exclude in [
+                    "_linkquality",
+                    "_update_available",
+                    "_update_state",
+                    "_battery",
+                    "_signal_strength",
+                    "_voltage",
+                    "_power",
+                    "_energy",
+                    "_current",
+                    "_temperature",
+                    "_humidity",
+                ]
+            ):
                 switch_entities.append(entity_id)
-    
+
     # Also get from entity registry for disabled entities
     entity_registry = async_get_entity_registry(hass)
     for entity in entity_registry.entities.values():
-        if (entity.domain in ("switch", "light") and 
-            entity.entity_id not in switch_entities and
-            not any(exclude in entity.entity_id for exclude in [
-                "_linkquality", "_update_available", "_update_state",
-                "_battery", "_signal_strength", "_voltage", "_power",
-                "_energy", "_current", "_temperature", "_humidity"
-            ])):
+        if (
+            entity.domain in ("switch", "light")
+            and entity.entity_id not in switch_entities
+            and not any(
+                exclude in entity.entity_id
+                for exclude in [
+                    "_linkquality",
+                    "_update_available",
+                    "_update_state",
+                    "_battery",
+                    "_signal_strength",
+                    "_voltage",
+                    "_power",
+                    "_energy",
+                    "_current",
+                    "_temperature",
+                    "_humidity",
+                ]
+            )
+        ):
             switch_entities.append(entity.entity_id)
-    
+
     return sorted(switch_entities)
 
 
@@ -77,15 +102,15 @@ class SwitchEnergyStatisticsConfigFlow(config_entries.ConfigFlow, domain=DOMAIN)
     ) -> FlowResult:
         """Handle the initial step."""
         errors = {}
-        
+
         if user_input is not None:
             gang_count = int(user_input[CONF_GANG_COUNT])
             name = user_input[CONF_NAME]
-            
+
             # Store data for next step
             self._gang_count = gang_count
             self._name = name
-            
+
             # Move to gang entity selection step
             return await self.async_step_gang_entities()
 
@@ -112,38 +137,41 @@ class SwitchEnergyStatisticsConfigFlow(config_entries.ConfigFlow, domain=DOMAIN)
     ) -> FlowResult:
         """Handle gang entity selection."""
         errors = {}
-        
+
         if user_input is not None:
             # Validate all selected entities exist
             available_entities = await get_switch_entities(self.hass)
-            current_states = [state.entity_id for state in self.hass.states.async_all() 
-                            if state.entity_id.startswith(("switch.", "light."))]
+            current_states = [
+                state.entity_id
+                for state in self.hass.states.async_all()
+                if state.entity_id.startswith(("switch.", "light."))
+            ]
             all_entities = list(set(available_entities + current_states))
-            
+
             gang_entities = {}
             for gang in range(1, self._gang_count + 1):
                 entity_key = f"gang_{gang}_entity"
                 selected_entity = user_input.get(entity_key)
-                
+
                 if not selected_entity:
                     errors[entity_key] = "required"
                 elif selected_entity not in all_entities:
                     errors[entity_key] = "invalid_switch_entity"
                 else:
                     gang_entities[gang] = selected_entity
-            
+
             if not errors:
                 # Store gang entities for next step
                 self._gang_entities = gang_entities
                 # Move to power configuration step
                 return await self.async_step_gang_config()
-        
+
         # Get available switch entities
         switch_entities = await get_switch_entities(self.hass)
-        
+
         if not switch_entities:
             return self.async_abort(reason="no_switch_entities")
-        
+
         # Create schema for gang entity selection
         gang_schema = {}
         for gang in range(1, self._gang_count + 1):
@@ -171,14 +199,14 @@ class SwitchEnergyStatisticsConfigFlow(config_entries.ConfigFlow, domain=DOMAIN)
     ) -> FlowResult:
         """Handle gang power configuration."""
         errors = {}
-        
+
         if user_input is not None:
             # Store gang power configurations
             self._gang_powers = {}
             for gang in range(1, self._gang_count + 1):
                 power_key = f"gang_{gang}_power"
                 self._gang_powers[gang] = user_input.get(power_key, DEFAULT_GANG_POWER)
-            
+
             # Create the entry
             return self.async_create_entry(
                 title=self._name,
@@ -239,20 +267,20 @@ class SwitchEnergyStatisticsOptionsFlow(config_entries.OptionsFlow):
             # Update gang power values
             updated_gang_powers = {}
             gang_count = int(self._config_entry.data[CONF_GANG_COUNT])
-            
+
             for gang in range(1, gang_count + 1):
                 power_key = f"gang_{gang}_power"
                 if power_key in user_input:
                     updated_gang_powers[gang] = user_input[power_key]
-            
+
             # Update the config entry data
             new_data = dict(self._config_entry.data)
             new_data[CONF_GANG_POWER] = updated_gang_powers
-            
+
             self.hass.config_entries.async_update_entry(
                 self._config_entry, data=new_data
             )
-            
+
             return self.async_create_entry(title="", data={})
 
         gang_count = int(self._config_entry.data[CONF_GANG_COUNT])
@@ -264,7 +292,7 @@ class SwitchEnergyStatisticsOptionsFlow(config_entries.OptionsFlow):
         for gang in range(1, gang_count + 1):
             power_key = f"gang_{gang}_power"
             current_power = current_gang_powers.get(gang, DEFAULT_GANG_POWER)
-            
+
             gang_schema[vol.Required(power_key, default=current_power)] = (
                 selector.NumberSelector(
                     selector.NumberSelectorConfig(
@@ -292,16 +320,18 @@ class SwitchEnergyStatisticsOptionsFlow(config_entries.OptionsFlow):
         """Get friendly name for an entity."""
         if not entity_id or entity_id.startswith("gang_"):
             return entity_id
-            
+
         # Try to get from entity registry first
         entity_registry = async_get_entity_registry(self.hass)
         if entity_entry := entity_registry.async_get(entity_id):
             if entity_entry.name:
                 return entity_entry.name
-        
+
         # Fall back to state friendly name
         if state := self.hass.states.get(entity_id):
-            return state.attributes.get("friendly_name", entity_id.split(".")[-1].replace("_", " ").title())
-        
+            return state.attributes.get(
+                "friendly_name", entity_id.split(".")[-1].replace("_", " ").title()
+            )
+
         # Final fallback
         return entity_id.split(".")[-1].replace("_", " ").title()

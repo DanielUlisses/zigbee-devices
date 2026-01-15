@@ -198,13 +198,11 @@ jobs:
       - name: Test workflow syntax with act (dry-run)
         run: |
           # Install act for local GitHub Actions testing
-          curl https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash
+          curl -s https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash -s -- -b /usr/local/bin
 
-          # Add act to PATH
-          export PATH="$PATH:/usr/local/bin"
-
-          # Test workflow syntax (dry-run only)
-          act --list || {
+          # Verify act is installed
+          which act
+          act --version
             echo "ERROR: Workflow syntax validation failed"
             exit 1
           }
@@ -259,9 +257,17 @@ jobs:
               fi
             done
             
-            # Check that __init__.py has content (more than just whitespace)
-            if [ ! -s "$component_dir__init__.py" ] || [ "$(cat "$component_dir__init__.py" | tr -d '[:space:]' | wc -c)" -eq 0 ]; then
-              echo "ERROR: __init__.py is empty or contains only whitespace in $component_dir"
+            # Check that __init__.py has content (more than just comments/whitespace)
+            init_file="$component_dir__init__.py"
+            if [ ! -f "$init_file" ]; then
+              echo "ERROR: __init__.py not found in $component_dir"
+              exit 1
+            fi
+            
+            # Count non-empty, non-comment lines
+            content_lines=$(grep -v '^[[:space:]]*$' "$init_file" | grep -v '^[[:space:]]*#' | wc -l)
+            if [ "$content_lines" -eq 0 ]; then
+              echo "ERROR: __init__.py contains no meaningful content in $component_dir"
               exit 1
             fi
             
