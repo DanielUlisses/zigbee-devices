@@ -95,7 +95,7 @@ jobs:
 
       - name: Type checking with mypy
         run: |
-          mypy custom_components/ --ignore-missing-imports --no-strict-optional --exit-zero
+          mypy custom_components/ --no-strict-optional || true
 
   manifest-validation:
     runs-on: ubuntu-latest

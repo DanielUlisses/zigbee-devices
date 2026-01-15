@@ -372,11 +372,11 @@ class SwitchEnergyStatisticsSensor(RestoreEntity, SensorEntity):
         """Get the date key for historical data based on period."""
         if self._period == PERIOD_DAILY:
             return timestamp.strftime("%Y-%m-%d")
-        elif self._period == PERIOD_WEEKLY:
+        if self._period == PERIOD_WEEKLY:
             # Get Monday of the week
             monday = timestamp - timedelta(days=timestamp.weekday())
             return monday.strftime("%Y-W%U")
-        elif self._period == PERIOD_MONTHLY:
+        if self._period == PERIOD_MONTHLY:
             return timestamp.strftime("%Y-%m")
         return timestamp.strftime("%Y-%m-%d")
 
@@ -580,7 +580,7 @@ class SwitchSummaryEnergyStatisticsSensor(RestoreEntity, SensorEntity):
 
         # Initialize current states
         now = dt_util.utcnow()
-        for i, switch_entity in enumerate(self._switch_entities):
+        for switch_entity in self._switch_entities:
             switch_state = self.hass.states.get(switch_entity)
             if switch_state:
                 self._gang_states[switch_entity] = switch_state.state == STATE_ON
@@ -692,10 +692,10 @@ class SwitchSummaryEnergyStatisticsSensor(RestoreEntity, SensorEntity):
         """Get the date key for historical data based on period."""
         if self._period == PERIOD_DAILY:
             return timestamp.strftime("%Y-%m-%d")
-        elif self._period == PERIOD_WEEKLY:
+        if self._period == PERIOD_WEEKLY:
             monday = timestamp - timedelta(days=timestamp.weekday())
             return monday.strftime("%Y-W%U")
-        elif self._period == PERIOD_MONTHLY:
+        if self._period == PERIOD_MONTHLY:
             return timestamp.strftime("%Y-%m")
         return timestamp.strftime("%Y-%m-%d")
 

@@ -90,7 +90,9 @@ SERVICE_ADD_SOLAR_PERIOD_DATA_SCHEMA = vol.Schema(
 )
 
 
-async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
+async def async_setup(
+    hass: HomeAssistant, config: ConfigType
+) -> bool:  # pylint: disable=unused-argument
     """Set up the Energy Generation Report component."""
     hass.data.setdefault(DOMAIN, {})
     return True

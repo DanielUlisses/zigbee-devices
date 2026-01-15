@@ -19,6 +19,20 @@ dev-setup: ## Set up development environment (runs setup-dev.sh)
 	@chmod +x setup-dev.sh
 	@./setup-dev.sh
 
+install-deps: ## Install all dependencies from requirements files
+	@echo "📦 Installing development dependencies..."
+	@if [ ! -d ".venv" ]; then \
+		echo "❌ Virtual environment not found. Run 'make setup' first."; \
+		exit 1; \
+	fi
+	@if [ -f "requirements-dev.txt" ]; then \
+		.venv/bin/pip install -r requirements-dev.txt; \
+	fi
+	@if [ -f "requirements.txt" ]; then \
+		.venv/bin/pip install -r requirements.txt; \
+	fi
+	@echo "✅ Dependencies installed!"
+
 install-hooks: ## Install pre-commit hooks only
 	@echo "🪝 Installing pre-commit hooks..."
 	@if [ ! -d ".venv" ]; then \
