@@ -80,7 +80,7 @@ For each gang, the integration creates the following entities:
 
 ### Energy Sensors
 - `sensor.{name}_gang_{n}_energy_daily` - Daily energy consumption
-- `sensor.{name}_gang_{n}_energy_weekly` - Weekly energy consumption  
+- `sensor.{name}_gang_{n}_energy_weekly` - Weekly energy consumption
 - `sensor.{name}_gang_{n}_energy_monthly` - Monthly energy consumption
 
 ### Power Sensor
@@ -222,7 +222,7 @@ automation:
 
 ### Common Issues
 
-1. **Sensor not updating**: 
+1. **Sensor not updating**:
    - Check that the switch entity exists and is updating
    - Verify the switch entity is in the correct format (switch.xxx or light.xxx)
 

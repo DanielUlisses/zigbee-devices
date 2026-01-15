@@ -30,10 +30,10 @@ cards:
     title: "House Solar Report"
     chart_type: bar
     period_months: 12
-    
+
   - type: custom:energy-generation-report-card
     entities:
-      - sensor.garage_energy_generation_report_monthly_solar_generation  
+      - sensor.garage_energy_generation_report_monthly_solar_generation
     title: "Garage Solar Report"
     chart_type: area
     period_months: 6
@@ -93,12 +93,12 @@ script:
           config_entry_id: "your_config_entry_id"
           date: "2024-01-01"
           solar_generation_kwh: 45.2
-      
+
       # January 2nd, 2024 - 38.7 kWh
       - service: energy_generation_report.add_solar_data
         data:
           config_entry_id: "your_config_entry_id"
-          date: "2024-01-02"  
+          date: "2024-01-02"
           solar_generation_kwh: 38.7
 ```
 
@@ -115,8 +115,8 @@ script:
           start_date: "2024-01-01"
           end_date: "2024-01-31"
           total_solar_generation_kwh: 850.0
-      
-      # Add 720 kWh for first half of February (will be split across 14 days = ~51.4 kWh/day)  
+
+      # Add 720 kWh for first half of February (will be split across 14 days = ~51.4 kWh/day)
       - service: energy_generation_report.add_solar_period_data
         data:
           config_entry_id: "your_config_entry_id"
@@ -154,15 +154,15 @@ script:
           end_date: "2023-12-15"
           grid_consumption_reading: 42000.0
           grid_injection_reading: 8500.0
-      
-      # January 2024  
+
+      # January 2024
       - service: energy_generation_report.add_billing_data
         data:
           config_entry_id: "your_config_entry_id"
           end_date: "2024-01-15"
           grid_consumption_reading: 43200.5
           grid_injection_reading: 9850.2
-      
+
       # February 2024
       - service: energy_generation_report.add_billing_data
         data:
@@ -177,13 +177,13 @@ script:
           config_entry_id: "your_config_entry_id"
           date: "2023-12-01"
           solar_generation_kwh: 42.5
-      
+
       - service: energy_generation_report.add_solar_data
         data:
           config_entry_id: "your_config_entry_id"
           date: "2023-12-02"
           solar_generation_kwh: 38.9
-      
+
       # Or add entire month at once (1240 kWh across 31 days = 40 kWh/day)
       - service: energy_generation_report.add_solar_period_data
         data:
@@ -206,11 +206,11 @@ cards:
       - type: entity
         entity: sensor.energy_generation_report_monthly_solar_generation
         name: "This Month Solar"
-        
+
       - type: entity
         entity: sensor.energy_generation_report_monthly_total_consumption
         name: "This Month Usage"
-        
+
       - type: entity
         entity: sensor.energy_generation_report_cumulative_balance
         name: "Energy Balance"
@@ -234,8 +234,8 @@ cards:
           green: 1000
           yellow: 500
           red: 0
-          
-      - type: gauge  
+
+      - type: gauge
         entity: sensor.energy_generation_report_cumulative_balance
         name: "Energy Balance"
         min: -500

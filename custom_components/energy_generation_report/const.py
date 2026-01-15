@@ -38,13 +38,13 @@ SENSOR_TYPES = {
     },
     "monthly_grid_consumption": {
         "name": "Monthly Grid Consumption",
-        "unit": "kWh", 
+        "unit": "kWh",
         "icon": "mdi:transmission-tower",
     },
     "monthly_grid_injection": {
         "name": "Monthly Grid Injection",
         "unit": "kWh",
-        "icon": "mdi:transmission-tower-export", 
+        "icon": "mdi:transmission-tower-export",
     },
     "monthly_total_consumption": {
         "name": "Monthly Total Consumption",

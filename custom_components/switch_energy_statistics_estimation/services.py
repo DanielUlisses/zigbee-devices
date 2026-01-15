@@ -1,12 +1,11 @@
 """Services for Switch Energy Statistics."""
+
 from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import Any
 
 import voluptuous as vol
-
 from homeassistant.core import HomeAssistant, ServiceCall, callback
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.service import async_register_admin_service
@@ -54,13 +53,13 @@ async def async_setup_services(hass: HomeAssistant) -> None:
         """Reset energy data for a sensor."""
         entity_id = call.data["entity_id"]
         period = call.data["period"]
-        
+
         # Find the entity
         entity = hass.data.get("entity_registry", {}).get(entity_id)
         if not entity:
             _LOGGER.error("Entity %s not found", entity_id)
             return
-            
+
         # Reset the energy value
         state = hass.states.get(entity_id)
         if state and hasattr(state, "entity"):
@@ -75,13 +74,13 @@ async def async_setup_services(hass: HomeAssistant) -> None:
         entity_id = call.data["entity_id"]
         energy = call.data["energy"]
         date = call.data.get("date", dt_util.utcnow().date())
-        
+
         # Find the entity
         entity = hass.data.get("entity_registry", {}).get(entity_id)
         if not entity:
             _LOGGER.error("Entity %s not found", entity_id)
             return
-            
+
         # Set energy value
         state = hass.states.get(entity_id)
         if state and hasattr(state, "entity"):
@@ -89,7 +88,9 @@ async def async_setup_services(hass: HomeAssistant) -> None:
                 date_key = date.strftime("%Y-%m-%d")
                 state.entity._historical_data[date_key] = energy
                 await state.entity._save_historical_data()
-                _LOGGER.info("Set energy for %s on %s to %s Wh", entity_id, date, energy)
+                _LOGGER.info(
+                    "Set energy for %s on %s to %s Wh", entity_id, date, energy
+                )
 
     @callback
     async def export_data_service(call: ServiceCall) -> None:
@@ -97,19 +98,19 @@ async def async_setup_services(hass: HomeAssistant) -> None:
         entity_id = call.data["entity_id"]
         start_date = call.data.get("start_date")
         end_date = call.data.get("end_date")
-        
+
         # Find the entity
         entity = hass.data.get("entity_registry", {}).get(entity_id)
         if not entity:
             _LOGGER.error("Entity %s not found", entity_id)
             return
-            
+
         # Export data
         state = hass.states.get(entity_id)
         if state and hasattr(state, "entity"):
             if hasattr(state.entity, "_historical_data"):
                 data = state.entity._historical_data
-                
+
                 # Filter by date range if specified
                 if start_date or end_date:
                     filtered_data = {}
@@ -125,7 +126,7 @@ async def async_setup_services(hass: HomeAssistant) -> None:
                             # Handle weekly/monthly keys differently
                             filtered_data[date_key] = value
                     data = filtered_data
-                
+
                 # Fire event with data
                 hass.bus.async_fire(
                     f"{DOMAIN}_data_export",
