@@ -1,0 +1,194 @@
+add_billing_data:
+  name: Add billing data
+  description: Add energy meter readings for a billing period
+  fields:
+    config_entry_id:
+      name: Config Entry ID
+      description: The ID of the Energy Generation Report config entry
+      required: true
+      selector:
+        text:
+    end_date:
+      name: Billing period end date
+      description: The end date of the billing period
+      required: true
+      selector:
+        date:
+    grid_consumption_reading:
+      name: Grid consumption meter reading
+      description: The cumulative meter reading for energy consumed from the grid
+      required: true
+      selector:
+        number:
+          min: 0
+          step: 0.001
+          mode: box
+          unit_of_measurement: kWh
+    grid_injection_reading:
+      name: Grid injection meter reading
+      description: The cumulative meter reading for energy injected to the grid
+      required: true
+      selector:
+        number:
+          min: 0
+          step: 0.001
+          mode: box
+          unit_of_measurement: kWh
+
+update_billing_data:
+  name: Update billing data
+  description: Update energy meter readings for a billing period
+  fields:
+    config_entry_id:
+      name: Config Entry ID
+      description: The ID of the Energy Generation Report config entry
+      required: true
+      selector:
+        text:
+    end_date:
+      name: Billing period end date
+      description: The end date of the billing period to update
+      required: true
+      selector:
+        date:
+    grid_consumption_reading:
+      name: Grid consumption meter reading
+      description: The cumulative meter reading for energy consumed from the grid
+      required: true
+      selector:
+        number:
+          min: 0
+          step: 0.001
+          mode: box
+          unit_of_measurement: kWh
+    grid_injection_reading:
+      name: Grid injection meter reading
+      description: The cumulative meter reading for energy injected to the grid
+      required: true
+      selector:
+        number:
+          min: 0
+          step: 0.001
+          mode: box
+          unit_of_measurement: kWh
+
+delete_billing_data:
+  name: Delete billing data
+  description: Delete billing period data
+  fields:
+    config_entry_id:
+      name: Config Entry ID
+      description: The ID of the Energy Generation Report config entry
+      required: true
+      selector:
+        text:
+    end_date:
+      name: Billing period end date
+      description: The end date of the billing period to delete
+      required: true
+      selector:
+        date:
+
+add_solar_data:
+  name: Add solar generation data
+  description: Add manual solar generation data for a specific date
+  fields:
+    config_entry_id:
+      name: Config Entry ID
+      description: The ID of the Energy Generation Report config entry
+      required: true
+      selector:
+        text:
+    date:
+      name: Date
+      description: The date for the solar generation data
+      required: true
+      selector:
+        date:
+    solar_generation_kwh:
+      name: Solar Generation (kWh)
+      description: The solar energy generated on this date
+      required: true
+      selector:
+        number:
+          min: 0
+          step: 0.001
+          mode: box
+          unit_of_measurement: kWh
+
+update_solar_data:
+  name: Update solar generation data
+  description: Update manual solar generation data for a specific date
+  fields:
+    config_entry_id:
+      name: Config Entry ID
+      description: The ID of the Energy Generation Report config entry
+      required: true
+      selector:
+        text:
+    date:
+      name: Date
+      description: The date for the solar generation data to update
+      required: true
+      selector:
+        date:
+    solar_generation_kwh:
+      name: Solar Generation (kWh)
+      description: The solar energy generated on this date
+      required: true
+      selector:
+        number:
+          min: 0
+          step: 0.001
+          mode: box
+          unit_of_measurement: kWh
+
+delete_solar_data:
+  name: Delete solar generation data
+  description: Delete manual solar generation data for a specific date
+  fields:
+    config_entry_id:
+      name: Config Entry ID
+      description: The ID of the Energy Generation Report config entry
+      required: true
+      selector:
+        text:
+    date:
+      name: Date
+      description: The date for the solar generation data to delete
+      required: true
+      selector:
+        date:
+
+add_solar_period_data:
+  name: Add solar generation period data
+  description: Add solar generation data for a period, distributed evenly across all days
+  fields:
+    config_entry_id:
+      name: Config Entry ID
+      description: The ID of the Energy Generation Report config entry
+      required: true
+      selector:
+        text:
+    start_date:
+      name: Period start date
+      description: The first date of the period
+      required: true
+      selector:
+        date:
+    end_date:
+      name: Period end date
+      description: The last date of the period
+      required: true
+      selector:
+        date:
+    total_solar_generation_kwh:
+      name: Total Solar Generation (kWh)
+      description: Total solar energy generated during the entire period (will be distributed evenly across days)
+      required: true
+      selector:
+        number:
+          min: 0
+          step: 0.001
+          mode: box
+          unit_of_measurement: kWh

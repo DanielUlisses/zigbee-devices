@@ -1,0 +1,180 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Energy Generation Report Setup",
+        "description": "Configure your energy generation report",
+        "data": {
+          "name": "Name",
+          "solar_sensor": "Solar Energy Sensor",
+          "initial_grid_consumption": "Initial Grid Consumption Reading (kWh)",
+          "initial_grid_injection": "Initial Grid Injection Reading (kWh)",
+          "minimum_billing_kwh": "Minimum Billing Amount (kWh)",
+          "initial_balance": "Initial Balance (kWh)",
+          "billing_period_days": "Billing Period Length (days)"
+        },
+        "data_description": {
+          "solar_sensor": "Select the sensor that tracks your daily solar energy production",
+          "initial_grid_consumption": "The starting meter reading for energy consumed from the grid",
+          "initial_grid_injection": "The starting meter reading for energy injected to the grid",
+          "minimum_billing_kwh": "The minimum amount the utility company charges (usually 100 kWh)",
+          "initial_balance": "Starting balance with utility company (positive = credit, negative = debt)",
+          "billing_period_days": "Default number of days in a billing period"
+        }
+      },
+      "reconfigure": {
+        "title": "Reconfigure Energy Generation Report",
+        "description": "Update your energy generation report settings",
+        "data": {
+          "name": "Name",
+          "solar_sensor": "Solar Energy Sensor",
+          "initial_grid_consumption": "Initial Grid Consumption Reading (kWh)",
+          "initial_grid_injection": "Initial Grid Injection Reading (kWh)",
+          "minimum_billing_kwh": "Minimum Billing Amount (kWh)",
+          "initial_balance": "Initial Balance (kWh)",
+          "billing_period_days": "Billing Period Length (days)"
+        }
+      }
+    },
+    "error": {
+      "invalid_sensor": "Selected sensor is not valid or not available",
+      "no_energy_sensors": "No energy sensors found in your Home Assistant setup"
+    },
+    "abort": {
+      "already_configured": "This solar sensor is already configured",
+      "no_energy_sensors": "No energy sensors found. Please add an energy monitoring device first."
+    }
+  },
+  "services": {
+    "add_billing_data": {
+      "name": "Add billing data",
+      "description": "Add energy meter readings for a billing period",
+      "fields": {
+        "config_entry_id": {
+          "name": "Config Entry ID",
+          "description": "The ID of the Energy Generation Report config entry"
+        },
+        "end_date": {
+          "name": "Billing period end date",
+          "description": "The end date of the billing period"
+        },
+        "grid_consumption_reading": {
+          "name": "Grid consumption meter reading",
+          "description": "The cumulative meter reading for energy consumed from the grid"
+        },
+        "grid_injection_reading": {
+          "name": "Grid injection meter reading",
+          "description": "The cumulative meter reading for energy injected to the grid"
+        }
+      }
+    },
+    "update_billing_data": {
+      "name": "Update billing data",
+      "description": "Update energy meter readings for a billing period",
+      "fields": {
+        "config_entry_id": {
+          "name": "Config Entry ID",
+          "description": "The ID of the Energy Generation Report config entry"
+        },
+        "end_date": {
+          "name": "Billing period end date",
+          "description": "The end date of the billing period to update"
+        },
+        "grid_consumption_reading": {
+          "name": "Grid consumption meter reading",
+          "description": "The cumulative meter reading for energy consumed from the grid"
+        },
+        "grid_injection_reading": {
+          "name": "Grid injection meter reading",
+          "description": "The cumulative meter reading for energy injected to the grid"
+        }
+      }
+    },
+    "delete_billing_data": {
+      "name": "Delete billing data",
+      "description": "Delete billing period data",
+      "fields": {
+        "config_entry_id": {
+          "name": "Config Entry ID",
+          "description": "The ID of the Energy Generation Report config entry"
+        },
+        "end_date": {
+          "name": "Billing period end date",
+          "description": "The end date of the billing period to delete"
+        }
+      }
+    },
+    "add_solar_data": {
+      "name": "Add solar generation data",
+      "description": "Add manual solar generation data for a specific date",
+      "fields": {
+        "config_entry_id": {
+          "name": "Config Entry ID",
+          "description": "The ID of the Energy Generation Report config entry"
+        },
+        "date": {
+          "name": "Date",
+          "description": "The date for the solar generation data"
+        },
+        "solar_generation_kwh": {
+          "name": "Solar Generation (kWh)",
+          "description": "The solar energy generated on this date"
+        }
+      }
+    },
+    "update_solar_data": {
+      "name": "Update solar generation data",
+      "description": "Update manual solar generation data for a specific date",
+      "fields": {
+        "config_entry_id": {
+          "name": "Config Entry ID",
+          "description": "The ID of the Energy Generation Report config entry"
+        },
+        "date": {
+          "name": "Date",
+          "description": "The date for the solar generation data to update"
+        },
+        "solar_generation_kwh": {
+          "name": "Solar Generation (kWh)",
+          "description": "The solar energy generated on this date"
+        }
+      }
+    },
+    "delete_solar_data": {
+      "name": "Delete solar generation data",
+      "description": "Delete manual solar generation data for a specific date",
+      "fields": {
+        "config_entry_id": {
+          "name": "Config Entry ID",
+          "description": "The ID of the Energy Generation Report config entry"
+        },
+        "date": {
+          "name": "Date",
+          "description": "The date for the solar generation data to delete"
+        }
+      }
+    },
+    "add_solar_period_data": {
+      "name": "Add solar generation period data",
+      "description": "Add solar generation data for a period, distributed evenly across all days",
+      "fields": {
+        "config_entry_id": {
+          "name": "Config Entry ID",
+          "description": "The ID of the Energy Generation Report config entry"
+        },
+        "start_date": {
+          "name": "Period start date",
+          "description": "The first date of the period"
+        },
+        "end_date": {
+          "name": "Period end date",
+          "description": "The last date of the period"
+        },
+        "total_solar_generation_kwh": {
+          "name": "Total Solar Generation (kWh)",
+          "description": "Total solar energy generated during the entire period (will be distributed evenly across days)"
+        }
+      }
+    }
+  }
+}
