@@ -211,7 +211,8 @@ class SwitchEnergyStatisticsConfigFlow(config_entries.ConfigFlow, domain=DOMAIN)
                     CONF_GANG_COUNT: self._gang_count,
                     CONF_NAME: self._name,
                     CONF_GANG_POWER: self._gang_powers,
-                    "gang_entities": self._gang_entities,  # Store individual gang entities
+                    "gang_entities": self._gang_entities,
+                    # Store individual gang entities
                 },
             )
 

@@ -220,7 +220,8 @@ class EnergyReportCoordinator:
             )
             solar_consumption = solar_generation_period - grid_injection_period
 
-            # Calculate balance change (injection - consumption, but respect minimum billing)
+            # Calculate balance change (injection - consumption,
+            # but respect minimum billing)
             minimum_kwh = self.config_entry.data.get(
                 CONF_MINIMUM_BILLING_KWH, DEFAULT_MINIMUM_BILLING_KWH
             )
@@ -307,7 +308,10 @@ class EnergyReportSensor(SensorEntity, RestoreEntity):
         """Initialize the sensor."""
         self._coordinator = coordinator
         self._sensor_type = sensor_type
-        self._attr_name = f"{coordinator.config_entry.data[CONF_NAME]} {SENSOR_TYPES[sensor_type]['name']}"
+        # Format the sensor name
+        name_prefix = coordinator.config_entry.data[CONF_NAME]
+        sensor_name = SENSOR_TYPES[sensor_type]["name"]
+        self._attr_name = f"{name_prefix} {sensor_name}"
         self._attr_unique_id = f"{coordinator.config_entry.entry_id}_{sensor_type}"
         self._attr_native_unit_of_measurement = SENSOR_TYPES[sensor_type]["unit"]
         self._attr_icon = SENSOR_TYPES[sensor_type]["icon"]

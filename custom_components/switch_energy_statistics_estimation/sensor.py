@@ -53,7 +53,8 @@ async def async_setup_entry(
     # Backward compatibility: if no gang_entities, use the old switch_entity approach
     if not gang_entities and CONF_SWITCH_ENTITY in entry.data:
         switch_entity = entry.data[CONF_SWITCH_ENTITY]
-        # Create fake gang entities (this won't work well, but maintains some backward compatibility)
+        # Create fake gang entities (this won't work well,
+        # but maintains some backward compatibility)
         gang_entities = {1: switch_entity}
 
     if not gang_entities:
@@ -328,7 +329,10 @@ class SwitchEnergyStatisticsSensor(RestoreEntity, SensorEntity):
             if energy_consumed_wh > 0:
                 self._energy_value += energy_consumed_wh
                 _LOGGER.debug(
-                    "Gang %d: Switch was ON for %.3f hours, consumed %.3f Wh (%.1f W), total: %.3f Wh",
+                    (
+                        "Gang %d: Switch was ON for %.3f hours, "
+                        "consumed %.3f Wh (%.1f W), total: %.3f Wh"
+                    ),
                     self._gang,
                     time_diff_hours,
                     energy_consumed_wh,
@@ -646,7 +650,10 @@ class SwitchSummaryEnergyStatisticsSensor(RestoreEntity, SensorEntity):
             if energy_consumed_wh > 0:
                 self._energy_value += energy_consumed_wh
                 _LOGGER.debug(
-                    "Summary %s: Gang was ON for %.3f hours, consumed %.3f Wh (%.1f W), total: %.3f Wh",
+                    (
+                        "Summary %s: Gang was ON for %.3f hours, "
+                        "consumed %.3f Wh (%.1f W), total: %.3f Wh"
+                    ),
                     switch_entity,
                     time_diff_hours,
                     energy_consumed_wh,

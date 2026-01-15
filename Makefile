@@ -33,8 +33,8 @@ format: ## Format all Python code with Black and isort
 		echo "❌ Virtual environment not found. Run 'make setup' first."; \
 		exit 1; \
 	fi
-	@.venv/bin/black custom_components/
 	@.venv/bin/isort custom_components/
+	@.venv/bin/black custom_components/
 
 lint: ## Run linting (flake8) on Python code
 	@echo "🔍 Linting Python code..."
@@ -60,7 +60,18 @@ pre-commit: ## Run all pre-commit hooks
 	fi
 	@.venv/bin/pre-commit run --all-files
 
-check-all: format lint yaml-lint ## Run all code quality checks
+format-like-precommit: ## Format code exactly like pre-commit hooks do
+	@echo "🎨 Formatting code like pre-commit..."
+	@if [ ! -d ".venv" ]; then \
+		echo "❌ Virtual environment not found. Run 'make setup' first."; \
+		exit 1; \
+	fi
+	@.venv/bin/pre-commit run trailing-whitespace --all-files || true
+	@.venv/bin/pre-commit run end-of-file-fixer --all-files || true
+	@.venv/bin/pre-commit run isort --all-files || true
+	@.venv/bin/pre-commit run black --all-files || true
+
+check-all: format-like-precommit lint yaml-lint ## Run all code quality checks
 	@echo "✅ All code quality checks completed!"
 
 commit-check: ## Check if code is ready for commit (runs pre-commit hooks)
@@ -117,7 +128,8 @@ dev-workflow: ## Show recommended development workflow
 	@echo "   make clean"
 
 # Quick commands for common tasks
-quick-format: ## Quick format (Black only)
+quick-format: ## Quick format (isort then Black)
+	@.venv/bin/isort custom_components/ 2>/dev/null || echo "Run 'make setup' first"
 	@.venv/bin/black custom_components/ 2>/dev/null || echo "Run 'make setup' first"
 
 quick-lint: ## Quick lint check (flake8 only)

@@ -32,7 +32,7 @@ repos:
         files: ^custom_components/.*\.py$
         args: [
           "--max-line-length=88",
-          "--extend-ignore=E203,W503,E501"
+          "--extend-ignore=E203,W503"
         ]
 
   - repo: https://github.com/adrienverge/yamllint
