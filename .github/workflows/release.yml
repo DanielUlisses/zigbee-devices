@@ -173,124 +173,54 @@ jobs:
 
           cd ..
 
-      - name: Generate release notes
-        id: release_notes
-        run: |
-          RELEASE_TITLE="Component Release $(date +'%Y-%m-%d')"
-          NOTES="## Component Releases\\n\\n"
-
-          # Get latest component tags for commit range
-          SWITCH_TAG="${{ steps.get_tags_for_notes.outputs.SWITCH_TAG }}"
-          ENERGY_TAG="${{ steps.get_tags_for_notes.outputs.ENERGY_TAG }}"
-
-          if [ "${{ needs.detect-changes.outputs.switch_changed }}" = "true" ]; then
-            NOTES+="### 🔌 Switch Energy Statistics Estimation ${{ needs.detect-changes.outputs.switch_tag }}\\n\\n"
-            
-            # Get commit messages for switch component
-            if [ -n "$SWITCH_TAG" ]; then
-              echo "Getting switch commits since ${SWITCH_TAG}"
-              SWITCH_COMMITS=$(git log --oneline --no-merges ${SWITCH_TAG}..HEAD -- custom_components/switch_energy_statistics_estimation/ | head -20)
-              if [ -n "$SWITCH_COMMITS" ]; then
-                NOTES+="**Changes:**\\n"
-                # Format commits properly for multiline output
-                while IFS= read -r line; do
-                  NOTES+="- ${line}\\n"
-                done <<< "$SWITCH_COMMITS"
-              else
-                NOTES+="**Changes:**\\n"
-                NOTES+="- Version update\\n"
-              fi
-            else
-              NOTES+="**Changes:**\\n"
-              NOTES+="- Initial release\\n"
-            fi
-            NOTES+="\\n"
-          fi
-
-          if [ "${{ needs.detect-changes.outputs.energy_report_changed }}" = "true" ]; then
-            NOTES+="### ⚡ Energy Generation Report ${{ needs.detect-changes.outputs.energy_report_tag }}\\n\\n"
-            
-            # Get commit messages for energy report component  
-            if [ -n "$ENERGY_TAG" ]; then
-              echo "Getting energy report commits since ${ENERGY_TAG}"
-              ENERGY_COMMITS=$(git log --oneline --no-merges ${ENERGY_TAG}..HEAD -- custom_components/energy_generation_report/ | head -20)
-              if [ -n "$ENERGY_COMMITS" ]; then
-                NOTES+="**Changes:**\\n"
-                # Format commits properly for multiline output
-                while IFS= read -r line; do
-                  NOTES+="- ${line}\\n"
-                done <<< "$ENERGY_COMMITS"
-              else
-                NOTES+="**Changes:**\\n"
-                NOTES+="- Version update\\n"
-              fi
-            else
-              NOTES+="**Changes:**\\n"
-              NOTES+="- Initial release\\n"
-            fi
-            NOTES+="\\n"
-          fi
-
-          if [ "${{ needs.detect-changes.outputs.switch_changed }}" = "false" ] && [ "${{ needs.detect-changes.outputs.energy_report_changed }}" = "false" ]; then
-            NOTES+="### No component changes detected\\n\\n"
-            NOTES+="This release contains infrastructure or documentation updates only.\\n\\n"
-          fi
-
-          NOTES+="## Installation via HACS\\n"
-          NOTES+="1. Add \\\`https://github.com/danielulisses/zigbee-devices\\\` as a custom repository in HACS\\n"
-          NOTES+="2. Search for the component you want to install:\\n"
-          if [ "${{ needs.detect-changes.outputs.switch_changed }}" = "true" ]; then
-            NOTES+="   - \\\"Switch Energy Statistics Estimation\\\" (${{ needs.detect-changes.outputs.switch_tag }})\\n"
-          fi
-          if [ "${{ needs.detect-changes.outputs.energy_report_changed }}" = "true" ]; then
-            NOTES+="   - \\\"Energy Generation Report\\\" (${{ needs.detect-changes.outputs.energy_report_tag }})\\n"
-          fi
-          NOTES+="3. Install and restart Home Assistant\\n"
-          NOTES+="4. Add the integration through Settings → Devices & Services\\n\\n"
-
-          NOTES+="## Manual Installation\\n"
-          if [ "${{ needs.detect-changes.outputs.switch_changed }}" = "true" ] || [ "${{ needs.detect-changes.outputs.energy_report_changed }}" = "true" ]; then
-            NOTES+="1. Download the appropriate ZIP file below:\\n"
-            if [ "${{ needs.detect-changes.outputs.switch_changed }}" = "true" ]; then
-              NOTES+="   - \\\`switch_energy_statistics_estimation-${{ needs.detect-changes.outputs.switch_tag }}.zip\\\`\\n"
-            fi
-            if [ "${{ needs.detect-changes.outputs.energy_report_changed }}" = "true" ]; then
-              NOTES+="   - \\\`energy_generation_report-${{ needs.detect-changes.outputs.energy_report_tag }}.zip\\\`\\n"
-            fi
-            NOTES+="2. Extract to your \\\`custom_components/\\\` directory\\n"
-          else
-            NOTES+="No component packages available for this release.\\n\\n"
-          fi
-
-          echo "RELEASE_TITLE=${RELEASE_TITLE}" >> $GITHUB_OUTPUT
-          echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
-          echo -e "$NOTES" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-      - name: Prepare release assets
-        id: prepare_assets
-        run: |
-          ASSETS=""
-          if [ "${{ needs.detect-changes.outputs.switch_changed }}" = "true" ]; then
-            ASSETS+="switch_energy_statistics_estimation-${{ needs.detect-changes.outputs.switch_tag }}.zip"$'\n'
-          fi
-          if [ "${{ needs.detect-changes.outputs.energy_report_changed }}" = "true" ]; then
-            ASSETS+="energy_generation_report-${{ needs.detect-changes.outputs.energy_report_tag }}.zip"$'\n'
-          fi
-          echo "RELEASE_ASSETS<<EOF" >> $GITHUB_OUTPUT
-          echo "$ASSETS" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-      - name: Create Release
-        id: create_release
+      - name: Create Switch Component Release
+        if: needs.detect-changes.outputs.switch_changed == 'true'
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: component-release-${{ github.run_number }}
-          name: ${{ steps.release_notes.outputs.RELEASE_TITLE }}
+          tag_name: ${{ needs.detect-changes.outputs.switch_tag }}
+          name: "Switch Energy Statistics Estimation ${{ needs.detect-changes.outputs.switch_version }}"
           draft: false
           prerelease: false
-          body: ${{ steps.release_notes.outputs.RELEASE_NOTES }}
-          files: ${{ steps.prepare_assets.outputs.RELEASE_ASSETS }}
+          body: |
+            ## Switch Energy Statistics Estimation ${{ needs.detect-changes.outputs.switch_tag }}
+            
+            ### Changes:
+            ${{ needs.detect-changes.outputs.switch_changed == 'true' && '- Version update to ' || '- Initial release' }}${{ needs.detect-changes.outputs.switch_version }}
+            
+            ### Installation:
+            1. Download the ZIP file below
+            2. Extract to your `custom_components/` directory
+            3. Restart Home Assistant
+            4. Add the integration via Settings → Devices & Services
+            
+            Or install via HACS by adding this repository as a custom integration.
+          files: switch_energy_statistics_estimation-${{ needs.detect-changes.outputs.switch_tag }}.zip
+          generate_release_notes: false
+
+      - name: Create Energy Report Component Release
+        if: needs.detect-changes.outputs.energy_report_changed == 'true'
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ needs.detect-changes.outputs.energy_report_tag }}
+          name: "Energy Generation Report ${{ needs.detect-changes.outputs.energy_report_version }}"
+          draft: false
+          prerelease: false
+          body: |
+            ## Energy Generation Report ${{ needs.detect-changes.outputs.energy_report_tag }}
+            
+            ### Changes:
+            ${{ needs.detect-changes.outputs.energy_report_changed == 'true' && '- Version update to ' || '- Initial release' }}${{ needs.detect-changes.outputs.energy_report_version }}
+            
+            ### Installation:
+            1. Download the ZIP file below
+            2. Extract to your `custom_components/` directory  
+            3. Restart Home Assistant
+            4. Add the integration via Settings → Devices & Services
+            
+            Or install via HACS by adding this repository as a custom integration.
+          files: energy_generation_report-${{ needs.detect-changes.outputs.energy_report_tag }}.zip
           generate_release_notes: false
