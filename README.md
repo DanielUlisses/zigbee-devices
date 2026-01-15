@@ -1,102 +1,162 @@
-# Home Assistant Energy Management Suite
+# Zigbee Device Converters
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge)](https://github.com/hacs/integration)
 [![GitHub release](https://img.shields.io/github/release/danielulisses/zigbee-devices.svg?style=for-the-badge)](https://github.com/danielulisses/zigbee-devices/releases)
 [![GitHub stars](https://img.shields.io/github/stars/danielulisses/zigbee-devices.svg?style=for-the-badge)](https://github.com/danielulisses/zigbee-devices/stargazers)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg?style=for-the-badge)](https://github.com/psf/black)
 
-A comprehensive collection of Home Assistant custom integrations and Zigbee device converters focused on energy management and smart home automation.
+Custom Zigbee device converters for Zigbee2MQTT, focused on specialized Tuya multi-gang switches and relay modules.
 
 ## 📦 What's Included
-
-| Component | Purpose | Version | Documentation |
-|-----------|---------|---------|---------------|
-| 🔌 **Switch Energy Statistics** | Multi-gang switch energy tracking | [![Release](https://img.shields.io/github/v/release/danielulisses/zigbee-devices?filter=switch_energy_statistics_estimation-v*&label=version)](https://github.com/danielulisses/zigbee-devices/releases) | [📖 Docs](custom_components/switch_energy_statistics_estimation/README.md) |
-| ⚡ **Energy Generation Report** | Solar generation reporting | [![Release](https://img.shields.io/github/v/release/danielulisses/zigbee-devices?filter=energy_generation_report-v*&label=version)](https://github.com/danielulisses/zigbee-devices/releases) | [📖 Docs](custom_components/energy_generation_report/README.md) |
-| 🔄 **Zigbee Converters** | Tuya multi-gang switch support | Latest | [📁 Converters](relay-2-types/) |
-
-## ✨ Key Features
-
-### 🔌 Switch Energy Statistics Estimation
-> **Track energy consumption for multi-gang switches with precision**
-
-- ✅ **Multi-Gang Support**: 1-8 gang switches with individual power configuration
-- 📊 **Energy Dashboard Integration**: Native Home Assistant Energy Dashboard compatibility
-- 📈 **Historical Tracking**: Daily, weekly, and monthly consumption statistics
-- ⚙️ **Configurable Power**: Set different power consumption per gang
-- 💾 **Data Persistence**: Survives Home Assistant restarts
-- 🛠️ **Service Management**: Built-in services for data export and management
-
-**Perfect for**: Smart switches, relay modules, multi-gang wall switches
-
-### ⚡ Energy Generation Report
-> **Comprehensive solar energy reporting with advanced visualizations**
-
-- 🏠 **Billing Period Management**: Flexible billing cycles for utility tracking
-- 📊 **Interactive Charts**: ApexCharts integration for beautiful visualizations
-- ⚖️ **Grid Balance Tracking**: Monitor consumption vs generation balance
-- 📤 **Data Export**: Export capabilities for external analysis
-- 🔌 **Service Integration**: Easy data entry through Home Assistant services
-- 📈 **Cumulative Tracking**: Long-term energy balance monitoring
-
-**Perfect for**: Solar installations, grid-tie systems, energy monitoring
 
 ### 🔄 Zigbee Device Converters
 > **Extend Zigbee2MQTT support for specialized devices**
 
-- 🏠 **Tuya Multi-Gang Switches**: Support for switches without neutral wire
-- 🔌 **2-Gang Switch Support**: Specialized converters for 2-gang modules
-- ⚡ **No-Neutral Compatibility**: Works with switches that don't require neutral
-- 🔧 **Modern Converter Format**: Uses latest Zigbee2MQTT converter architecture
+| Device Type | Purpose | Compatibility |
+|-------------|---------|---------------|
+| 🔌 **2-Gang Switch** | Tuya switches without neutral wire | Zigbee2MQTT |
+| ⚡ **Multi-Gang Relays** | Various gang configurations | Modern converter format |
+| 🏠 **No-Neutral Support** | Specialized wiring configurations | Latest Z2M architecture |
 
 **Perfect for**: Zigbee2MQTT users, Tuya device integration, custom device support
 
-## 🚀 Quick Start
+## ✨ Key Features
 
-### Prerequisites
-- Home Assistant 2024.1 or later
-- HACS installed and configured
-- For Zigbee converters: Zigbee2MQTT setup
+### 🔄 Modern Zigbee2MQTT Converters
+- ✅ **Tuya Multi-Gang Switches**: Support for switches without neutral wire
+- ✅ **2-Gang Switch Support**: Specialized converters for 2-gang modules  
+- ✅ **No-Neutral Compatibility**: Works with switches that don't require neutral
+- ✅ **Modern Converter Format**: Uses latest Zigbee2MQTT converter architecture
+- ✅ **Device Fingerprints**: Proper device identification patterns
+- ✅ **Endpoint Mapping**: Multi-endpoint switch configurations
 
-### Installation Methods
-
-#### Method 1: HACS (Recommended)
-1. **Add Repository**:
-   - HACS → Integrations → ⋮ → Custom repositories
-   - Add: `https://github.com/danielulisses/zigbee-devices`
-   - Category: Integration
-
-2. **Install Components**:
-   - Search for "Switch Energy Statistics Estimation" or "Energy Generation Report"
-   - Click Install → Restart Home Assistant
-
-3. **Configure**:
-   - Settings → Devices & Services → Add Integration
-   - Search for your installed component
-
-#### Method 2: Manual Installation
-```bash
-# Download specific component release
-wget https://github.com/danielulisses/zigbee-devices/releases/download/[component-version]/[component].zip
-
-# Extract to custom_components directory
-unzip [component].zip -d /config/custom_components/
-
-# Restart Home Assistant
-```
-
-#### Method 3: Git Clone (Development)
-```bash
-git clone https://github.com/danielulisses/zigbee-devices.git
-cp -r zigbee-devices/custom_components/[component] /config/custom_components/
-```
+## 🚀 Installation
 
 ### Zigbee2MQTT Converters
+
+1. **Locate your Zigbee2MQTT data directory**:
+   ```bash
+   # Common locations:
+   /opt/zigbee2mqtt/data/
+   /config/zigbee2mqtt/
+   ```
+
+2. **Copy converter files**:
+   ```bash
+   # Download converters
+   wget https://github.com/danielulisses/zigbee-devices/raw/main/relay-2-types/2-gang-switch-converter.mjs
+   
+   # Copy to Zigbee2MQTT directory
+   cp *.mjs /path/to/zigbee2mqtt/data/
+   ```
+
+3. **Restart Zigbee2MQTT**:
+   ```bash
+   # Docker
+   docker restart zigbee2mqtt
+   
+   # Home Assistant Add-on
+   # Restart via Supervisor
+   ```
+
+4. **Verify Installation**:
+   - Check Zigbee2MQTT logs for converter loading
+   - Devices should now be recognized with proper capabilities
+
+## 🔧 Development
+
+### Converter Development
 ```bash
-# Copy converter to Zigbee2MQTT
-cp relay-2-types/*.mjs /zigbee2mqtt/data/
-# Restart Zigbee2MQTT
+# Test converter syntax
+node -c relay-2-types/2-gang-switch-converter.mjs
+
+# Validate structure
+zigbee2mqtt --help # Check if converters load
 ```
+
+### Adding New Devices
+1. **Identify Device**: Get modelID and manufacturerName from Zigbee2MQTT logs
+2. **Create Converter**: Use existing converters as templates
+3. **Test**: Verify device recognition and functionality
+4. **Contribute**: Submit PR with new converter
+
+## 💬 Support & Community
+
+### 🔗 Related Repositories
+
+For Home Assistant custom integrations, check out our separate repositories:
+- 🔌 **[Switch Energy Statistics Estimation](https://github.com/danielulisses/switch-energy-statistics-estimation)** - Multi-gang switch energy tracking
+- ⚡ **[Energy Generation Report](https://github.com/danielulisses/energy-generation-report)** - Solar generation reporting with interactive charts
+
+### 🐛 Issues & Bug Reports
+Found a bug with a converter? Have a device request? 
+[🔗 Open an Issue](https://github.com/danielulisses/zigbee-devices/issues/new)
+
+### 💡 Device Requests  
+Need support for a new Zigbee device? 
+[💭 Request Device Support](https://github.com/danielulisses/zigbee-devices/discussions)
+
+### ⭐ Show Support
+If these converters are helpful, please:
+- ⭐ **Star this repository**
+- 🍴 **Share with the Zigbee2MQTT community** 
+- 💝 **Contribute new device converters**
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+**Made with ❤️ for the Zigbee2MQTT community**
+
+## 🔧 Supported Devices
+
+### Tuya 2-Gang Switch (No Neutral)
+- **Model**: TS000F_2_gang_switch
+- **Manufacturer**: _TZ3000_pe6rtun6
+- **Features**: 2 independent switch endpoints, power-on behavior control
+- **Converter**: [2-gang-switch-converter.mjs](relay-2-types/2-gang-switch-converter.mjs)
+
+### Alternative 2-Gang Implementation  
+- **Converter**: [2type-switch-converter.mjs](relay-2-types/2type-switch-converter.mjs)
+- **Use Case**: Alternative implementation for compatibility testing
+
+## 📚 Documentation
+
+### Converter Structure
+```javascript
+const definition = {
+    fingerprint: [{
+        modelID: 'TS000F',
+        manufacturerName: '_TZ3000_pe6rtun6',
+    }],
+    model: 'TS000F_2_gang_switch',
+    vendor: 'Tuya',
+    description: '2 gang switch module without neutral wire',
+    exposes: [
+        e.switch().withEndpoint("l1").setAccess("state", ea.STATE_SET),
+        e.switch().withEndpoint("l2").setAccess("state", ea.STATE_SET),
+        e.power_on_behavior().withAccess(ea.STATE_SET),
+    ],
+    extend: [tuya.modernExtend.tuyaBase({dp: true})],
+    meta: {
+        multiEndpoint: true,
+        multiEndpointSkip: ["power_on_behavior"],
+        tuyaDatapoints: [
+            [1, "state_l1", tuya.valueConverter.onOff],
+            [2, "state_l2", tuya.valueConverter.onOff],
+            [14, "power_on_behavior", tuya.valueConverter.powerOnBehavior],
+        ],
+    },
+};
+```
+
+### Device Identification
+1. **Check Zigbee2MQTT logs** for unrecognized devices
+2. **Note the modelID and manufacturerName** from the logs
+3. **Test with existing converters** or create new ones
+4. **Submit feedback** for device compatibility
 
 ## � Development & Contributing
 
