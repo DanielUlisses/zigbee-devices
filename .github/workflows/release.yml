@@ -64,11 +64,11 @@ jobs:
           else
             # Check if files changed since last component tag
             SWITCH_FILE_CHANGES=$(git diff --name-only ${SWITCH_TAG} HEAD -- custom_components/switch_energy_statistics_estimation/ || echo "changes")
-            
+
             if [ -n "$SWITCH_FILE_CHANGES" ]; then
               # Check if version changed
               PREV_SWITCH_VERSION=$(git show ${SWITCH_TAG}:custom_components/switch_energy_statistics_estimation/manifest.json | grep '"version"' | cut -d'"' -f4 || echo "0.0.0")
-              
+
               if [ "$PREV_SWITCH_VERSION" != "$SWITCH_VERSION" ]; then
                 echo "Switch version changed: $PREV_SWITCH_VERSION -> $SWITCH_VERSION"
                 SWITCH_CHANGED=true
@@ -80,18 +80,18 @@ jobs:
             fi
           fi
 
-          # Check Energy Report component  
+          # Check Energy Report component
           if [ -z "$ENERGY_TAG" ]; then
             echo "No previous energy tag found - initial release"
             ENERGY_CHANGED=true
           else
             # Check if files changed since last component tag
             ENERGY_FILE_CHANGES=$(git diff --name-only ${ENERGY_TAG} HEAD -- custom_components/energy_generation_report/ || echo "changes")
-            
+
             if [ -n "$ENERGY_FILE_CHANGES" ]; then
               # Check if version changed
               PREV_ENERGY_VERSION=$(git show ${ENERGY_TAG}:custom_components/energy_generation_report/manifest.json | grep '"version"' | cut -d'"' -f4 || echo "0.0.0")
-              
+
               if [ "$PREV_ENERGY_VERSION" != "$ENERGY_VERSION" ]; then
                 echo "Energy report version changed: $PREV_ENERGY_VERSION -> $ENERGY_VERSION"
                 ENERGY_CHANGED=true
@@ -150,7 +150,7 @@ jobs:
 
           if [ "${{ needs.detect-changes.outputs.energy_report_changed }}" = "true" ]; then
             ENERGY_TAG="${{ needs.detect-changes.outputs.energy_report_tag }}"
-            echo "Creating energy report component tag: $ENERGY_TAG" 
+            echo "Creating energy report component tag: $ENERGY_TAG"
             git tag -a "$ENERGY_TAG" -m "Energy Generation Report v${{ needs.detect-changes.outputs.energy_report_version }}"
             git push origin "$ENERGY_TAG"
           fi
@@ -165,7 +165,7 @@ jobs:
             echo "Created switch component archive"
           fi
 
-          # Create energy report component archive if changed  
+          # Create energy report component archive if changed
           if [ "${{ needs.detect-changes.outputs.energy_report_changed }}" = "true" ]; then
             zip -r ../energy_generation_report-${{ needs.detect-changes.outputs.energy_report_tag }}.zip energy_generation_report/
             echo "Created energy report component archive"
@@ -185,16 +185,16 @@ jobs:
           prerelease: false
           body: |
             ## Switch Energy Statistics Estimation ${{ needs.detect-changes.outputs.switch_tag }}
-            
+
             ### Changes:
             ${{ needs.detect-changes.outputs.switch_changed == 'true' && '- Version update to ' || '- Initial release' }}${{ needs.detect-changes.outputs.switch_version }}
-            
+
             ### Installation:
             1. Download the ZIP file below
             2. Extract to your `custom_components/` directory
             3. Restart Home Assistant
             4. Add the integration via Settings → Devices & Services
-            
+
             Or install via HACS by adding this repository as a custom integration.
           files: switch_energy_statistics_estimation-${{ needs.detect-changes.outputs.switch_tag }}.zip
           generate_release_notes: false
@@ -211,16 +211,16 @@ jobs:
           prerelease: false
           body: |
             ## Energy Generation Report ${{ needs.detect-changes.outputs.energy_report_tag }}
-            
+
             ### Changes:
             ${{ needs.detect-changes.outputs.energy_report_changed == 'true' && '- Version update to ' || '- Initial release' }}${{ needs.detect-changes.outputs.energy_report_version }}
-            
+
             ### Installation:
             1. Download the ZIP file below
-            2. Extract to your `custom_components/` directory  
+            2. Extract to your `custom_components/` directory
             3. Restart Home Assistant
             4. Add the integration via Settings → Devices & Services
-            
+
             Or install via HACS by adding this repository as a custom integration.
           files: energy_generation_report-${{ needs.detect-changes.outputs.energy_report_tag }}.zip
           generate_release_notes: false

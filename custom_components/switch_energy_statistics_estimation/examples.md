@@ -144,7 +144,7 @@ automation:
       data:
         title: "Weekly Energy Reset"
         message: >
-          Last week's total: 
+          Last week's total:
           Living Room: {{ states('sensor.living_room_gang_1_energy_weekly') }}Wh
           Kitchen: {{ states('sensor.kitchen_gang_1_energy_weekly') }}Wh
 ```

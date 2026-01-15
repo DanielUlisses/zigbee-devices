@@ -110,13 +110,13 @@ When providing code or assistance:
 ```python
 class YourSensorEntity(SensorEntity):
     """Representation of a sensor."""
-    
+
     def __init__(self, device, description):
         """Initialize the sensor."""
         super().__init__()
         self._device = device
         self.entity_description = description
-        
+
     @property
     def unique_id(self):
         """Return unique ID."""
@@ -127,15 +127,15 @@ class YourSensorEntity(SensorEntity):
 ```python
 class YourConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle config flow."""
-    
+
     VERSION = 1
-    
+
     async def async_step_user(self, user_input=None):
         """Handle initial step."""
         if user_input is not None:
             # Process user input
             return self.async_create_entry(title="Title", data=user_input)
-        
+
         return self.async_show_form(step_id="user", data_schema=vol.Schema({}))
 ```
 

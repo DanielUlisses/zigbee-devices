@@ -11,7 +11,7 @@ A collection of Home Assistant custom integrations for energy management and dev
 Track energy consumption of multi-gang switches (1-8 gangs) with estimated power consumption.
 
 **Features:**
-- Multi-gang switch support (1-8 gangs) 
+- Multi-gang switch support (1-8 gangs)
 - Energy consumption tracking (daily, weekly, monthly)
 - Home Assistant Energy Dashboard integration
 - Configurable power consumption per gang
@@ -25,7 +25,7 @@ Comprehensive solar energy generation reporting with interactive charts and bill
 
 **Features:**
 - Solar energy tracking with flexible billing periods
-- Grid consumption and injection monitoring  
+- Grid consumption and injection monitoring
 - Cumulative balance tracking with utility companies
 - Interactive ApexCharts visualizations
 - Service integration for easy data entry
@@ -37,7 +37,7 @@ Comprehensive solar energy generation reporting with interactive charts and bill
 1. **Add Repository**: Add `https://github.com/danielulisses/zigbee-devices` as a custom repository in HACS
 2. **Install**: Search for the component you want to install:
    - "Switch Energy Statistics Estimation"
-   - "Energy Generation Report"  
+   - "Energy Generation Report"
 3. **Configure**: Add the integration through Settings → Devices & Services
 4. **Restart**: Restart Home Assistant
 

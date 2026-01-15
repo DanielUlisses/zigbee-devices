@@ -12,7 +12,7 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import STATE_OFF, STATE_ON, UnitOfEnergy, UnitOfPower
+from homeassistant.const import STATE_ON, UnitOfEnergy, UnitOfPower
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.event import async_track_state_change_event
@@ -21,7 +21,6 @@ from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
 from .const import (
-    CONF_GANG_COUNT,
     CONF_GANG_POWER,
     CONF_NAME,
     CONF_SWITCH_ENTITY,
@@ -35,7 +34,6 @@ from .const import (
     SUFFIX_ENERGY_MONTHLY,
     SUFFIX_ENERGY_WEEKLY,
     SUFFIX_POWER,
-    UPDATE_INTERVAL,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -47,7 +45,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the Switch Energy Statistics sensors."""
-    gang_count = entry.data[CONF_GANG_COUNT]
+    # gang_count = entry.data[CONF_GANG_COUNT]  # Kept for future use
     gang_powers = entry.data[CONF_GANG_POWER]
     name = entry.data[CONF_NAME]
     gang_entities = entry.data.get("gang_entities", {})
@@ -57,7 +55,6 @@ async def async_setup_entry(
         switch_entity = entry.data[CONF_SWITCH_ENTITY]
         # Create fake gang entities (this won't work well, but maintains some backward compatibility)
         gang_entities = {1: switch_entity}
-        gang_count = 1
 
     if not gang_entities:
         _LOGGER.error("No gang entities configured for entry %s", entry.entry_id)
@@ -641,7 +638,6 @@ class SwitchSummaryEnergyStatisticsSensor(RestoreEntity, SensorEntity):
             and switch_entity in self._gang_states
             and self._gang_states[switch_entity]
         ):
-
             time_diff_hours = (
                 now - self._last_changed[switch_entity]
             ).total_seconds() / 3600

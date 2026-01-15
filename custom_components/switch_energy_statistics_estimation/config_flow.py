@@ -7,7 +7,6 @@ from typing import Any
 
 import voluptuous as vol
 from homeassistant import config_entries
-from homeassistant.components import switch
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import selector
@@ -17,7 +16,6 @@ from .const import (
     CONF_GANG_COUNT,
     CONF_GANG_POWER,
     CONF_NAME,
-    CONF_SWITCH_ENTITY,
     DEFAULT_GANG_POWER,
     DEFAULT_NAME,
     DOMAIN,
@@ -221,15 +219,15 @@ class SwitchEnergyStatisticsConfigFlow(config_entries.ConfigFlow, domain=DOMAIN)
         gang_schema = {}
         for gang in range(1, self._gang_count + 1):
             power_key = f"gang_{gang}_power"
-            gang_schema[vol.Required(power_key, default=DEFAULT_GANG_POWER)] = (
-                selector.NumberSelector(
-                    selector.NumberSelectorConfig(
-                        min=0.1,
-                        max=1000.0,
-                        step=0.1,
-                        unit_of_measurement="W",
-                        mode=selector.NumberSelectorMode.BOX,
-                    )
+            gang_schema[
+                vol.Required(power_key, default=DEFAULT_GANG_POWER)
+            ] = selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0.1,
+                    max=1000.0,
+                    step=0.1,
+                    unit_of_measurement="W",
+                    mode=selector.NumberSelectorMode.BOX,
                 )
             )
 
@@ -292,15 +290,15 @@ class SwitchEnergyStatisticsOptionsFlow(config_entries.OptionsFlow):
             power_key = f"gang_{gang}_power"
             current_power = current_gang_powers.get(gang, DEFAULT_GANG_POWER)
 
-            gang_schema[vol.Required(power_key, default=current_power)] = (
-                selector.NumberSelector(
-                    selector.NumberSelectorConfig(
-                        min=0.1,
-                        max=1000.0,
-                        step=0.1,
-                        unit_of_measurement="W",
-                        mode=selector.NumberSelectorMode.BOX,
-                    )
+            gang_schema[
+                vol.Required(power_key, default=current_power)
+            ] = selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0.1,
+                    max=1000.0,
+                    step=0.1,
+                    unit_of_measurement="W",
+                    mode=selector.NumberSelectorMode.BOX,
                 )
             )
 

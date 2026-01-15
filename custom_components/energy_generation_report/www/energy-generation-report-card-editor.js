@@ -1,6 +1,6 @@
 /**
  * Energy Generation Report Card Editor
- * 
+ *
  * Configuration editor for the custom card
  */
 
@@ -59,18 +59,18 @@ class EnergyGenerationReportCardEditor extends HTMLElement {
         .card-config {
           padding: 16px;
         }
-        
+
         .form-group {
           margin-bottom: 16px;
         }
-        
+
         .form-group label {
           display: block;
           margin-bottom: 4px;
           font-weight: 500;
           color: var(--primary-text-color);
         }
-        
+
         .form-group input,
         .form-group select,
         .form-group ha-entity-picker {
@@ -82,11 +82,11 @@ class EnergyGenerationReportCardEditor extends HTMLElement {
           color: var(--primary-text-color);
           font-size: 14px;
         }
-        
+
         .form-group ha-switch {
           margin-top: 8px;
         }
-        
+
         .entities-list {
           border: 1px solid var(--divider-color);
           border-radius: 4px;
@@ -94,7 +94,7 @@ class EnergyGenerationReportCardEditor extends HTMLElement {
           min-height: 100px;
           background: var(--card-background-color);
         }
-        
+
         .entity-item {
           display: flex;
           justify-content: space-between;
@@ -106,7 +106,7 @@ class EnergyGenerationReportCardEditor extends HTMLElement {
           border-radius: 4px;
           font-size: 14px;
         }
-        
+
         .entity-item button {
           background: none;
           border: none;
@@ -115,18 +115,18 @@ class EnergyGenerationReportCardEditor extends HTMLElement {
           padding: 2px 6px;
           border-radius: 2px;
         }
-        
+
         .entity-item button:hover {
           background: rgba(255,255,255,0.2);
         }
-        
+
         .add-entity {
           margin-top: 8px;
         }
       </style>
 
       <div class="card-config">
-        
+
         <div class="form-group">
           <label>Title</label>
           <input
@@ -148,7 +148,7 @@ class EnergyGenerationReportCardEditor extends HTMLElement {
             `).join('')}
             ${this._entities.length === 0 ? '<em>No entities selected</em>' : ''}
           </div>
-          
+
           <div class="add-entity">
             <ha-entity-picker
               .hass="${this._hass}"

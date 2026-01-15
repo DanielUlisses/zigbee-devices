@@ -56,10 +56,10 @@ If you're setting up this repository for the first time:
 
 ## Benefits of HACS Installation
 
-✅ **Automatic Updates**: Get notified of new versions  
-✅ **Easy Management**: Install/uninstall through UI  
-✅ **Version Control**: Track installed version and changelog  
-✅ **Backup Friendly**: HACS manages the installation location  
+✅ **Automatic Updates**: Get notified of new versions
+✅ **Easy Management**: Install/uninstall through UI
+✅ **Version Control**: Track installed version and changelog
+✅ **Backup Friendly**: HACS manages the installation location
 
 ## Troubleshooting HACS Installation
 

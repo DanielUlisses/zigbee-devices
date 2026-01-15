@@ -6,7 +6,7 @@ A comprehensive Home Assistant custom component for tracking and visualizing ene
 
 - **Solar Energy Tracking**: Monitor daily solar energy production from any Home Assistant energy sensor
 - **Billing Period Management**: Flexible billing periods with customizable start/end dates
-- **Automatic Calculations**: 
+- **Automatic Calculations**:
   - Monthly solar generation
   - Grid consumption and injection
   - Total energy consumption
@@ -22,7 +22,7 @@ A comprehensive Home Assistant custom component for tracking and visualizing ene
 ### HACS (Recommended)
 
 1. Open HACS in your Home Assistant instance
-2. Go to "Integrations" 
+2. Go to "Integrations"
 3. Click the three dots in the top right corner and select "Custom repositories"
 4. Add this repository URL and select "Integration" as the category
 5. Install the "Energy Generation Report" integration
@@ -105,7 +105,7 @@ show_toolbar: true
 The integration creates the following sensors:
 
 - **Monthly Solar Generation**: Total solar energy generated in the current period
-- **Monthly Grid Consumption**: Energy consumed from grid in the current period  
+- **Monthly Grid Consumption**: Energy consumed from grid in the current period
 - **Monthly Grid Injection**: Energy injected to grid in the current period
 - **Monthly Total Consumption**: Total energy consumed (grid + solar - injection)
 - **Monthly Solar Consumption**: Solar energy consumed directly (solar - injection)

@@ -1,6 +1,6 @@
 /**
  * Energy Generation Report Card
- * 
+ *
  * Custom Lovelace card for displaying energy generation reports
  * with interactive charts using ApexCharts
  */
@@ -84,7 +84,7 @@ class EnergyGenerationReportCard extends HTMLElement {
         .card-content {
           padding: 16px;
         }
-        
+
         .card-header {
           font-size: 1.2em;
           font-weight: 500;
@@ -178,9 +178,9 @@ class EnergyGenerationReportCard extends HTMLElement {
           </div>
 
           ${this._config.show_toolbar ? this.renderToolbar() : ''}
-          
+
           ${this.renderMetrics(periodsData)}
-          
+
           <div class="chart-container" id="chart-container">
             ${Object.keys(periodsData).length === 0 ?
         '<div class="no-data">No billing data available. Add your first billing period data to see charts.</div>' :
@@ -207,13 +207,13 @@ class EnergyGenerationReportCard extends HTMLElement {
   renderToolbar() {
     return `
       <div class="toolbar">
-        <button class="${this._config.chart_type === 'bar' ? 'active' : ''}" 
+        <button class="${this._config.chart_type === 'bar' ? 'active' : ''}"
                 onclick="this.getRootNode().host.setChartType('bar')">
           Bar Chart
         </button>
         <button class="${this._config.chart_type === 'area' ? 'active' : ''}"
                 onclick="this.getRootNode().host.setChartType('area')">
-          Area Chart  
+          Area Chart
         </button>
         <button class="${this._config.chart_type === 'mixed' ? 'active' : ''}"
                 onclick="this.getRootNode().host.setChartType('mixed')">
@@ -241,7 +241,7 @@ class EnergyGenerationReportCard extends HTMLElement {
             <span class="metric-unit">kWh</span>
           </div>
         </div>
-        
+
         <div class="metric-card">
           <div class="metric-title">Grid Consumption</div>
           <div class="metric-value">
@@ -249,7 +249,7 @@ class EnergyGenerationReportCard extends HTMLElement {
             <span class="metric-unit">kWh</span>
           </div>
         </div>
-        
+
         <div class="metric-card">
           <div class="metric-title">Grid Injection</div>
           <div class="metric-value">
@@ -257,7 +257,7 @@ class EnergyGenerationReportCard extends HTMLElement {
             <span class="metric-unit">kWh</span>
           </div>
         </div>
-        
+
         <div class="metric-card">
           <div class="metric-title">Total Consumption</div>
           <div class="metric-value">
@@ -265,7 +265,7 @@ class EnergyGenerationReportCard extends HTMLElement {
             <span class="metric-unit">kWh</span>
           </div>
         </div>
-        
+
         <div class="metric-card">
           <div class="metric-title">Solar Consumption</div>
           <div class="metric-value">
@@ -273,7 +273,7 @@ class EnergyGenerationReportCard extends HTMLElement {
             <span class="metric-unit">kWh</span>
           </div>
         </div>
-        
+
         <div class="metric-card">
           <div class="metric-title">Cumulative Balance</div>
           <div class="metric-value ${latestPeriod.cumulative_balance >= 0 ? 'balance-positive' : 'balance-negative'}">

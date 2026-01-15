@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 from datetime import timedelta
-from typing import Any
 
 import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
