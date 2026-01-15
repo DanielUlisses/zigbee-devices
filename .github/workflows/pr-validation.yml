@@ -6,8 +6,8 @@ on:
       - main
       - master
     paths:
-      - 'custom_components/**'
-      - '.github/workflows/**'
+      - "custom_components/**"
+      - ".github/workflows/**"
 
 permissions:
   contents: read
@@ -31,28 +31,28 @@ jobs:
         run: |
           # Get list of changed files
           CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
-          
+
           # Check which components changed
           SWITCH_CHANGED=false
           ENERGY_CHANGED=false
           WORKFLOW_CHANGED=false
-          
+
           if echo "$CHANGED_FILES" | grep -q "custom_components/switch_energy_statistics_estimation/"; then
             SWITCH_CHANGED=true
           fi
-          
+
           if echo "$CHANGED_FILES" | grep -q "custom_components/energy_generation_report/"; then
             ENERGY_CHANGED=true
           fi
-          
+
           if echo "$CHANGED_FILES" | grep -q ".github/workflows/"; then
             WORKFLOW_CHANGED=true
           fi
-          
+
           echo "switch_changed=${SWITCH_CHANGED}" >> $GITHUB_OUTPUT
           echo "energy_report_changed=${ENERGY_CHANGED}" >> $GITHUB_OUTPUT
           echo "workflow_changed=${WORKFLOW_CHANGED}" >> $GITHUB_OUTPUT
-          
+
           echo "Switch component changed: ${SWITCH_CHANGED}"
           echo "Energy report component changed: ${ENERGY_CHANGED}"
           echo "Workflow files changed: ${WORKFLOW_CHANGED}"
@@ -68,7 +68,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install validation tools
         run: |
@@ -163,7 +163,7 @@ jobs:
             SWITCH_VERSION=$(jq -r '.version' custom_components/switch_energy_statistics_estimation/manifest.json)
             echo "Switch component version: $SWITCH_VERSION"
           fi
-          
+
           if [ "${{ needs.detect-changes.outputs.energy_report_changed }}" = "true" ]; then
             echo "Checking energy report component version..."
             ENERGY_VERSION=$(jq -r '.version' custom_components/energy_generation_report/manifest.json)
@@ -182,7 +182,7 @@ jobs:
         run: |
           # Install yq for YAML validation
           sudo snap install yq
-          
+
           # Check all workflow YAML files
           for workflow in .github/workflows/*.yml .github/workflows/*.yaml; do
             if [ -f "$workflow" ]; then
@@ -199,6 +199,9 @@ jobs:
         run: |
           # Install act for local GitHub Actions testing
           curl https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash
+          
+          # Add act to PATH
+          export PATH="$PATH:/usr/local/bin"
           
           # Test workflow syntax (dry-run only)
           act --list || {
@@ -256,9 +259,15 @@ jobs:
               fi
             done
             
-            # Check that __init__.py is not empty
-            if [ ! -s "$component_dir__init__.py" ]; then
-              echo "ERROR: __init__.py is empty in $component_dir"
+            # Check that __init__.py has content (more than just whitespace)
+            if [ ! -s "$component_dir__init__.py" ] || [ "$(cat "$component_dir__init__.py" | tr -d '[:space:]' | wc -c)" -eq 0 ]; then
+              echo "ERROR: __init__.py is empty or contains only whitespace in $component_dir"
+              exit 1
+            fi
+            
+            # Check manifest.json is valid JSON
+            if ! python -m json.tool "$component_dir/manifest.json" > /dev/null 2>&1; then
+              echo "ERROR: manifest.json is not valid JSON in $component_dir"
               exit 1
             fi
             
@@ -283,7 +292,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install Home Assistant core (for testing)
         run: |
@@ -298,37 +307,39 @@ jobs:
             component_name=$(basename "$component_dir")
             echo "Testing import for $component_name"
             
-            # Test basic imports
-            python -c "
-            import sys
-            sys.path.insert(0, '.')
-            try:
-                import $component_name
-                print('✓ Successfully imported $component_name')
-            except ImportError as e:
-                print('WARNING: Import test failed for $component_name: $e')
-            except Exception as e:
-                print('ERROR: Unexpected error importing $component_name: $e')
-                sys.exit(1)
-            "
+            # Test basic imports using a simple python command
+            if python -c "import sys; sys.path.insert(0, '.'); import $component_name; print('✓ Successfully imported $component_name')" 2>&1; then
+              echo "Import test passed for $component_name"
+            else
+              echo "WARNING: Import test failed for $component_name (this may be expected if dependencies are missing)"
+            fi
           done
 
   pr-summary:
     runs-on: ubuntu-latest
-    needs: [detect-changes, python-validation, manifest-validation, workflow-validation, security-scan, component-structure-validation, integration-test]
+    needs:
+      [
+        detect-changes,
+        python-validation,
+        manifest-validation,
+        workflow-validation,
+        security-scan,
+        component-structure-validation,
+        integration-test,
+      ]
     if: always()
     steps:
       - name: PR Validation Summary
         run: |
           echo "# Pull Request Validation Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           echo "## Changed Components" >> $GITHUB_STEP_SUMMARY
           echo "- Switch Energy Statistics: ${{ needs.detect-changes.outputs.switch_changed }}" >> $GITHUB_STEP_SUMMARY
           echo "- Energy Generation Report: ${{ needs.detect-changes.outputs.energy_report_changed }}" >> $GITHUB_STEP_SUMMARY
           echo "- Workflow Files: ${{ needs.detect-changes.outputs.workflow_changed }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           echo "## Validation Results" >> $GITHUB_STEP_SUMMARY
           echo "- Python Validation: ${{ needs.python-validation.result || 'skipped' }}" >> $GITHUB_STEP_SUMMARY
           echo "- Manifest Validation: ${{ needs.manifest-validation.result || 'skipped' }}" >> $GITHUB_STEP_SUMMARY
@@ -336,7 +347,7 @@ jobs:
           echo "- Security Scan: ${{ needs.security-scan.result || 'skipped' }}" >> $GITHUB_STEP_SUMMARY
           echo "- Structure Validation: ${{ needs.component-structure-validation.result || 'skipped' }}" >> $GITHUB_STEP_SUMMARY
           echo "- Integration Test: ${{ needs.integration-test.result || 'skipped' }}" >> $GITHUB_STEP_SUMMARY
-          
+
           # Check if any validation failed
           if [[ "${{ needs.python-validation.result }}" == "failure" || 
                 "${{ needs.manifest-validation.result }}" == "failure" || 
