@@ -193,7 +193,7 @@ jobs:
           fi
 
           NOTES+="## Installation via HACS\\n"
-          NOTES+="1. Add \\`https://github.com/danielulisses/zigbee-devices\\` as a custom repository in HACS\\n"
+          NOTES+="1. Add \\\`https://github.com/danielulisses/zigbee-devices\\\` as a custom repository in HACS\\n"
           NOTES+="2. Search for the component you want to install:\\n"
           if [ "${{ needs.detect-changes.outputs.switch_changed }}" = "true" ]; then
             NOTES+="   - \\\"Switch Energy Statistics Estimation\\\" (${{ needs.detect-changes.outputs.switch_tag }})\\n"
@@ -208,13 +208,12 @@ jobs:
           if [ "${{ needs.detect-changes.outputs.switch_changed }}" = "true" ] || [ "${{ needs.detect-changes.outputs.energy_report_changed }}" = "true" ]; then
             NOTES+="1. Download the appropriate ZIP file below:\\n"
             if [ "${{ needs.detect-changes.outputs.switch_changed }}" = "true" ]; then
-              NOTES+="   - \\`switch_energy_statistics_estimation-${{ needs.detect-changes.outputs.switch_tag }}.zip\\`\\n"
+              NOTES+="   - \\\`switch_energy_statistics_estimation-${{ needs.detect-changes.outputs.switch_tag }}.zip\\\`\\n"
             fi
             if [ "${{ needs.detect-changes.outputs.energy_report_changed }}" = "true" ]; then
-              NOTES+="   - \\`energy_generation_report-${{ needs.detect-changes.outputs.energy_report_tag }}.zip\\`\\n"
+              NOTES+="   - \\\`energy_generation_report-${{ needs.detect-changes.outputs.energy_report_tag }}.zip\\\`\\n"
             fi
-            NOTES+="2. Extract to your \\`custom_components/\\` directory\\n"
-            NOTES+="3. Restart Home Assistant\\n\\n"
+            NOTES+="2. Extract to your \\\`custom_components/\\\` directory\\n"
           else
             NOTES+="No component packages available for this release.\\n\\n"
           fi
